@@ -2,7 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import HeroAnimation from "./HeroAnimation";
+import PhoneFrame from "@/components/common/PhoneFrame";
 
 const BULLETS = [
   "מפת נכסים דינמית בזמן אמת: תצוגה ויזואלית חכמה של כל הציוד הפרוס בשטח, צבוע לפי דחיפות וסטטוס זמינות.",
@@ -27,15 +27,15 @@ function CheckIcon() {
 }
 
 export default function Hero() {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref    = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.1 });
 
   return (
-    <section className="bg-brand-dark text-white py-20 lg:py-28">
+    <section className="bg-brand-dark text-white py-20 lg:py-28 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={ref} className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
 
-          {/* Text column — appears on the right in RTL */}
+          {/* ── Text column — visual RIGHT in RTL ──────────────────────────── */}
           <motion.div
             className="space-y-7"
             initial={{ opacity: 0, y: 30 }}
@@ -75,7 +75,7 @@ export default function Hero() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.65 }}
             >
-              {/* Primary CTA — gentle pulse glow once on entry */}
+              {/* Primary CTA — one-shot pulse glow on entry */}
               <motion.a
                 href="#contact"
                 className="bg-brand-cyan hover:bg-brand-cyan-dark text-brand-primary font-bold px-6 py-3.5 rounded-lg text-center transition-colors text-sm"
@@ -99,17 +99,54 @@ export default function Hero() {
             </motion.div>
           </motion.div>
 
-          {/* Animation column — appears on the left in RTL */}
-          <motion.div
-            className="hidden lg:flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={inView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
-          >
-            <div className="w-full">
-              <HeroAnimation />
+          {/* ── Phone visual — visual LEFT in RTL ──────────────────────────── */}
+          <div className="hidden lg:flex items-center justify-center">
+            <div className="relative">
+              {/* Ambient glow behind phone */}
+              <div
+                className="absolute inset-0 -z-10 scale-110"
+                style={{
+                  background: "radial-gradient(ellipse at center, rgba(22,183,232,0.18) 0%, transparent 70%)",
+                  filter: "blur(32px)",
+                }}
+              />
+
+              {/* Phone — slight tilt, enters from below */}
+              <motion.div
+                initial={{ opacity: 0, y: 40, rotate: -4 }}
+                animate={inView ? { opacity: 1, y: 0, rotate: -2 } : {}}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+                className="w-[260px]"
+              >
+                <PhoneFrame
+                  src="/stuff/Main.png"
+                  alt="מסך הבית של פרשמור — ניהול נכסי שטח"
+                  priority
+                />
+              </motion.div>
+
+              {/* Floating chip — urgency count (bottom-left of phone in visual) */}
+              <motion.div
+                className="absolute -bottom-3 -left-10 flex items-center gap-2 bg-white rounded-xl shadow-2xl px-3 py-2 z-20"
+                initial={{ opacity: 0, x: -18, y: 8 }}
+                animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
+                transition={{ duration: 0.55, delay: 0.85, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 animate-pulse" />
+                <span className="text-xs font-bold text-brand-primary whitespace-nowrap">3 דחופים לאיסוף</span>
+              </motion.div>
+
+              {/* Floating chip — total assets (top-right of phone) */}
+              <motion.div
+                className="absolute -top-3 -right-10 bg-brand-cyan rounded-xl shadow-xl px-3 py-2 z-20"
+                initial={{ opacity: 0, x: 18, y: -8 }}
+                animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
+                transition={{ duration: 0.55, delay: 1.0, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <span className="text-xs font-bold text-brand-primary whitespace-nowrap">47 נכסים בשטח</span>
+              </motion.div>
             </div>
-          </motion.div>
+          </div>
 
         </div>
       </div>
