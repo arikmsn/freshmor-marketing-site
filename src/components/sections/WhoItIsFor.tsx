@@ -66,12 +66,12 @@ export default function WhoItIsFor() {
           </p>
         </div>
 
-        {/* Cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Cards — flex-wrap with justify-center so the last row (2 cards) is always centered */}
+        <div className="flex flex-wrap justify-center gap-6">
           {INDUSTRIES.map((industry) => (
             <div
               key={industry.title}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+              className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.33%-16px)] bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
             >
               <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 ${industry.color}`}>
                 {industry.icon}
