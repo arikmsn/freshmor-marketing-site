@@ -1,9 +1,23 @@
+import Image from "next/image";
+
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <span className="text-2xl font-bold text-indigo-700 tracking-tight">פרשמור</span>
+          <a href="#" className="flex items-center gap-2.5">
+            <Image
+              src="/stuff/NewLogo.png"
+              alt="פרשמור"
+              height={36}
+              width={120}
+              className="h-9 w-auto object-contain"
+              priority
+            />
+            <span className="hidden sm:inline text-lg font-bold text-indigo-700 tracking-tight">
+              פרשמור
+            </span>
+          </a>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
             <a href="#who-it-is-for" className="hover:text-indigo-700 transition-colors">למי זה מיועד</a>
