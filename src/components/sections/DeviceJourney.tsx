@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import PhoneFrame from "@/components/common/PhoneFrame";
 
 // ── Journey steps ──────────────────────────────────────────────────────────────
@@ -80,13 +80,22 @@ function DeviceDot() {
 export default function DeviceJourney() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const inView     = useInView(sectionRef, { once: true, amount: 0.15 });
-  const [activeStep, setActiveStep] = useState<number | null>(null);
-  const [played, setPlayed]         = useState(false);
+  const [activeStep, setActiveStep]         = useState<number | null>(null);
+  const [played, setPlayed]                 = useState(false);
+  // Mobile-specific: which step index (0-3) the large phone shows
+  const [mobileDisplayStep, setMobileDisplayStep] = useState(0);
+
+  // Sync mobile display with the play animation
+  useEffect(() => {
+    if (activeStep !== null) {
+      setMobileDisplayStep(activeStep - 1);
+    }
+  }, [activeStep]);
 
   function playJourney() {
-    // reset then restart
     setActiveStep(null);
     setPlayed(false);
+    setMobileDisplayStep(0);
     setTimeout(() => startJourney(), 80);
   }
 
@@ -95,6 +104,10 @@ export default function DeviceJourney() {
     STEPS.forEach((step, i) => {
       setTimeout(() => setActiveStep(step.id), i * 950);
     });
+  }
+
+  function goMobileStep(i: number) {
+    setMobileDisplayStep(Math.max(0, Math.min(STEPS.length - 1, i)));
   }
 
   return (
@@ -145,7 +158,7 @@ export default function DeviceJourney() {
             transition={{ duration: 0.7, ease: "easeOut" }}
           />
 
-          <div className="grid grid-cols-4 gap-6 relative z-10">
+          <div className="grid grid-cols-4 gap-8 relative z-10 pt-2 pb-6">
             {STEPS.map((step, index) => {
               const isActive  = activeStep !== null && step.id <= activeStep;
               const isCurrent = step.id === activeStep;
@@ -160,7 +173,7 @@ export default function DeviceJourney() {
                 >
                   {/* Step icon circle */}
                   <motion.div
-                    className="relative w-[72px] h-[72px] rounded-2xl flex items-center justify-center mb-4 border-2"
+                    className="relative w-[72px] h-[72px] rounded-2xl flex items-center justify-center mb-5 border-2"
                     animate={{
                       backgroundColor: isActive ? "#0D2B4E" : "#ffffff",
                       borderColor:     isActive ? "#16B7E8" : "#e2e8f0",
@@ -196,17 +209,17 @@ export default function DeviceJourney() {
                     שלב {index + 1}
                   </span>
                   <h3 className="font-bold text-brand-primary text-sm mb-0.5">{step.label}</h3>
-                  <p className="text-xs text-slate-500 mb-4">{step.sublabel}</p>
+                  <p className="text-xs text-slate-500 mb-5">{step.sublabel}</p>
 
-                  {/* Phone frame — replaces text card */}
+                  {/* Phone frame — full column width, glow on active */}
                   <motion.div
                     className="w-full"
                     animate={{
                       filter: isCurrent
-                        ? "drop-shadow(0 0 16px rgba(22,183,232,0.45))"
+                        ? "drop-shadow(0 0 18px rgba(22,183,232,0.5))"
                         : isActive
-                        ? "drop-shadow(0 4px 12px rgba(0,0,0,0.2))"
-                        : "drop-shadow(0 2px 6px rgba(0,0,0,0.12))",
+                        ? "drop-shadow(0 6px 16px rgba(0,0,0,0.18))"
+                        : "drop-shadow(0 2px 8px rgba(0,0,0,0.10))",
                       scale: isCurrent ? 1.04 : 1,
                     }}
                     transition={{ duration: 0.4 }}
@@ -223,76 +236,124 @@ export default function DeviceJourney() {
           </div>
         </div>
 
-        {/* ── Mobile: vertical timeline ───────────────────────────────────── */}
-        <div className="lg:hidden space-y-0">
-          {STEPS.map((step, index) => {
-            const isActive  = activeStep !== null && step.id <= activeStep;
-            const isCurrent = step.id === activeStep;
+        {/* ── Mobile: single-phone swiper ─────────────────────────────────── */}
+        {/*
+          Shows one large phone at a time.
+          – Step indicator pills at top (tap to jump).
+          – Prev / Next arrow buttons below.
+          – Syncs with the play animation via mobileDisplayStep.
+        */}
+        <div className="lg:hidden">
 
-            return (
-              <motion.div
+          {/* Step indicator pills */}
+          <div className="flex justify-center gap-2 mb-8">
+            {STEPS.map((step, i) => (
+              <button
                 key={step.id}
-                className="flex gap-4"
-                initial={{ opacity: 0, x: 16 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
+                onClick={() => goMobileStep(i)}
+                aria-label={`שלב ${i + 1}: ${step.label}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === mobileDisplayStep
+                    ? "bg-brand-cyan w-8"
+                    : "bg-slate-300 w-4 hover:bg-slate-400"
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Large phone — AnimatePresence for cross-fade on step change */}
+          <div className="flex justify-center mb-6" style={{ minHeight: "360px" }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={mobileDisplayStep}
+                className="relative flex flex-col items-center"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {/* Vertical connector */}
-                <div className="flex flex-col items-center shrink-0">
-                  <motion.div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center border-2"
-                    animate={{
-                      backgroundColor: isActive ? "#0D2B4E" : "#ffffff",
-                      borderColor:     isActive ? "#16B7E8" : "#e2e8f0",
-                    }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <motion.div
-                      animate={{ color: isActive ? "#16B7E8" : "#94a3b8" }}
-                      transition={{ duration: 0.4 }}
-                      className="[&>svg]:w-4 [&>svg]:h-4"
-                    >
-                      {step.icon}
-                    </motion.div>
-                  </motion.div>
-                  {index < STEPS.length - 1 && (
-                    <motion.div
-                      className="w-px flex-1 mt-1 min-h-[24px]"
-                      animate={{ backgroundColor: isActive ? "#16B7E8" : "#e2e8f0" }}
-                      transition={{ duration: 0.4 }}
-                    />
-                  )}
-                </div>
-
-                {/* Content — label + phone frame side by side */}
-                <div className="pb-6 flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-brand-primary text-sm">{step.label}</h3>
-                    {isCurrent && <DeviceDot />}
+                {/* Device dot badge when this step is the animation's current */}
+                {activeStep === STEPS[mobileDisplayStep].id && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                    <DeviceDot />
                   </div>
-                  <p className="text-xs text-slate-500 mb-3">{step.sublabel}</p>
-
-                  {/* Phone frame — constrained width on mobile */}
-                  <motion.div
-                    className="w-[140px]"
-                    animate={{
-                      filter: isCurrent
-                        ? "drop-shadow(0 0 12px rgba(22,183,232,0.4))"
-                        : "drop-shadow(0 2px 6px rgba(0,0,0,0.14))",
-                      scale: isCurrent ? 1.03 : 1,
-                    }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <PhoneFrame
-                      src={step.screenshot}
-                      alt={step.screenshotAlt}
-                    />
-                  </motion.div>
-                </div>
+                )}
+                <motion.div
+                  className="w-[210px]"
+                  animate={{
+                    filter:
+                      activeStep === STEPS[mobileDisplayStep].id
+                        ? "drop-shadow(0 0 20px rgba(22,183,232,0.55))"
+                        : "drop-shadow(0 6px 20px rgba(0,0,0,0.18))",
+                  }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <PhoneFrame
+                    src={STEPS[mobileDisplayStep].screenshot}
+                    alt={STEPS[mobileDisplayStep].screenshotAlt}
+                  />
+                </motion.div>
               </motion.div>
-            );
-          })}
+            </AnimatePresence>
+          </div>
+
+          {/* Step label */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`label-${mobileDisplayStep}`}
+              className="text-center mb-7"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <span className="text-[10px] font-bold text-brand-cyan/70 uppercase tracking-widest block mb-1">
+                שלב {mobileDisplayStep + 1}
+              </span>
+              <h3 className="font-bold text-brand-primary text-lg">
+                {STEPS[mobileDisplayStep].label}
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                {STEPS[mobileDisplayStep].sublabel}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Prev / Next navigation */}
+          <div className="flex justify-center items-center gap-4">
+            <button
+              onClick={() => goMobileStep(mobileDisplayStep - 1)}
+              disabled={mobileDisplayStep === 0}
+              aria-label="שלב הקודם"
+              className="w-11 h-11 rounded-xl border-2 border-slate-200 flex items-center justify-center text-slate-500
+                         hover:border-brand-cyan hover:text-brand-primary disabled:opacity-30 transition-colors"
+            >
+              {/* Chevron pointing right = "previous" in RTL */}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            <span className="text-sm text-slate-500 font-semibold tabular-nums w-12 text-center">
+              {mobileDisplayStep + 1} / {STEPS.length}
+            </span>
+
+            <button
+              onClick={() => goMobileStep(mobileDisplayStep + 1)}
+              disabled={mobileDisplayStep === STEPS.length - 1}
+              aria-label="שלב הבא"
+              className="w-11 h-11 rounded-xl border-2 border-slate-200 flex items-center justify-center text-slate-500
+                         hover:border-brand-cyan hover:text-brand-primary disabled:opacity-30 transition-colors"
+            >
+              {/* Chevron pointing left = "next" in RTL */}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
+
         </div>
+        {/* ── end mobile swiper ───────────────────────────────────────────── */}
 
       </div>
     </section>
