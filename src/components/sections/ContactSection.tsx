@@ -40,12 +40,11 @@ export default function ContactSection() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    // No backend — just show success state
     setSubmitted(true);
   }
 
   return (
-    <section id="contact" className="bg-slate-900 py-20 lg:py-28">
+    <section id="contact" className="bg-brand-dark py-20 lg:py-28">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
@@ -53,21 +52,21 @@ export default function ContactSection() {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             מוכנים לשלוט על הציוד שלכם?
           </h2>
-          <p className="text-slate-400 text-lg leading-relaxed">
+          <p className="text-blue-200 text-lg leading-relaxed">
             שלחו פרטים ונחזור אליכם לשיחת היכרות קצרה.
           </p>
         </div>
 
         {submitted ? (
           /* Success state */
-          <div className="bg-emerald-900/40 border border-emerald-700 rounded-2xl p-10 text-center">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-brand-cyan/10 border border-brand-cyan/30 rounded-2xl p-10 text-center">
+            <div className="w-16 h-16 rounded-full bg-brand-cyan/20 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <h3 className="text-xl font-bold text-white mb-2">הפרטים התקבלו!</h3>
-            <p className="text-slate-400">ניצור איתכם קשר בהקדם לשיחת היכרות.</p>
+            <p className="text-blue-200">ניצור איתכם קשר בהקדם לשיחת היכרות.</p>
           </div>
         ) : (
           /* Form */
@@ -78,7 +77,7 @@ export default function ContactSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* שם חברה */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-700" htmlFor="company">
+                <label className="text-sm font-semibold text-brand-primary" htmlFor="company">
                   שם חברה <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -89,13 +88,13 @@ export default function ContactSection() {
                   value={form.company}
                   onChange={handleChange}
                   placeholder="לדוגמה: חברת האוויר הנקי"
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-transparent transition"
                 />
               </div>
 
               {/* שם איש קשר */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-700" htmlFor="name">
+                <label className="text-sm font-semibold text-brand-primary" htmlFor="name">
                   שם איש קשר <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -106,13 +105,13 @@ export default function ContactSection() {
                   value={form.name}
                   onChange={handleChange}
                   placeholder="שם מלא"
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-transparent transition"
                 />
               </div>
 
               {/* טלפון */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-700" htmlFor="phone">
+                <label className="text-sm font-semibold text-brand-primary" htmlFor="phone">
                   טלפון <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -123,13 +122,13 @@ export default function ContactSection() {
                   value={form.phone}
                   onChange={handleChange}
                   placeholder="050-0000000"
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-transparent transition"
                 />
               </div>
 
               {/* אימייל */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-700" htmlFor="email">
+                <label className="text-sm font-semibold text-brand-primary" htmlFor="email">
                   אימייל <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -140,14 +139,14 @@ export default function ContactSection() {
                   value={form.email}
                   onChange={handleChange}
                   placeholder="you@company.co.il"
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-transparent transition"
                 />
               </div>
             </div>
 
             {/* כמה טכנאים */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold text-slate-700" htmlFor="techCount">
+              <label className="text-sm font-semibold text-brand-primary" htmlFor="techCount">
                 כמה טכנאים יש לכם? <span className="text-red-500">*</span>
               </label>
               <select
@@ -156,7 +155,7 @@ export default function ContactSection() {
                 required
                 value={form.techCount}
                 onChange={handleChange}
-                className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition appearance-none"
+                className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-transparent transition appearance-none"
               >
                 {TECH_COUNT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value} disabled={opt.value === ""}>
@@ -168,7 +167,7 @@ export default function ContactSection() {
 
             {/* מה האתגר הכי גדול */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold text-slate-700" htmlFor="challenge">
+              <label className="text-sm font-semibold text-brand-primary" htmlFor="challenge">
                 מה האתגר הכי גדול שלכם היום בשטח?
               </label>
               <textarea
@@ -178,13 +177,13 @@ export default function ContactSection() {
                 value={form.challenge}
                 onChange={handleChange}
                 placeholder="ספרו לנו בכמה מילים על הכאב העיקרי שאתם חווים בניהול הציוד..."
-                className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition resize-none"
+                className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-transparent transition resize-none"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 rounded-lg transition-colors text-sm"
+              className="w-full bg-brand-cyan hover:bg-brand-cyan-dark text-brand-primary font-bold py-3.5 rounded-lg transition-colors text-sm"
             >
               שלחו פרטים ונחזור אליכם לשיחת היכרות קצרה
             </button>

@@ -40,14 +40,14 @@ const BENEFITS = [
 
 export default function ManagerBenefits() {
   return (
-    <section className="bg-indigo-950 py-20 lg:py-28">
+    <section className="bg-brand-primary py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="text-center max-w-2xl mx-auto mb-14">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             מה מנהל האופרציה מרוויח?
           </h2>
-          <p className="text-indigo-300 text-lg leading-relaxed">
+          <p className="text-blue-200 text-lg leading-relaxed">
             פרשמור לא עוד כלי עבודה, היא מרכז הפיקוד של הצוות שלכם בשטח.
           </p>
         </div>
@@ -56,13 +56,13 @@ export default function ManagerBenefits() {
           {BENEFITS.map((benefit) => (
             <div
               key={benefit.title}
-              className="bg-indigo-900/50 border border-indigo-800 rounded-2xl p-6 hover:bg-indigo-900/70 transition-colors"
+              className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors"
             >
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-800 text-indigo-200 mb-5">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-cyan/20 text-brand-cyan mb-5">
                 {benefit.icon}
               </div>
               <h3 className="text-base font-bold text-white mb-2">{benefit.title}</h3>
-              <p className="text-sm text-indigo-300 leading-relaxed">{benefit.text}</p>
+              <p className="text-sm text-blue-200 leading-relaxed">{benefit.text}</p>
             </div>
           ))}
         </div>

@@ -36,7 +36,7 @@ export default function TrustSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-brand-primary mb-4">
             בנוי על אמון ושקיפות
           </h2>
           <p className="text-slate-600 text-lg leading-relaxed">
@@ -49,7 +49,7 @@ export default function TrustSection() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-14 w-36 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-medium border border-slate-200"
+              className="h-14 w-36 rounded-xl bg-brand-surface flex items-center justify-center text-slate-400 text-xs font-medium border border-brand-cyan/15"
             >
               לוגו לקוח
             </div>
@@ -60,11 +60,11 @@ export default function TrustSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {PRINCIPLES.map((p) => (
             <div key={p.title} className="flex gap-4 items-start">
-              <div className="shrink-0 w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <div className="shrink-0 w-14 h-14 rounded-2xl bg-brand-cyan/10 text-brand-cyan flex items-center justify-center">
                 {p.icon}
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 mb-1">{p.title}</h3>
+                <h3 className="font-bold text-brand-primary mb-1">{p.title}</h3>
                 <p className="text-sm text-slate-600 leading-relaxed">{p.text}</p>
               </div>
             </div>

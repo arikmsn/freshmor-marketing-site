@@ -82,7 +82,7 @@ export default function AssetMapSimulation() {
 
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-brand-primary mb-4">
             לתכנן את השבוע בחמש דקות, לא בחמש שעות
           </h2>
           <p className="text-lg text-slate-600 leading-relaxed">
@@ -97,15 +97,15 @@ export default function AssetMapSimulation() {
 
         {/* Time window selector */}
         <div className="flex justify-center mb-10">
-          <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 gap-1">
+          <div className="inline-flex rounded-xl border border-brand-cyan/20 bg-brand-surface p-1 gap-1">
             {TIME_WINDOWS.map((w) => (
               <button
                 key={w}
                 onClick={() => setActiveWindow(w)}
                 className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
                   activeWindow === w
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-brand-primary text-white shadow-sm"
+                    : "text-brand-primary hover:text-brand-primary/70"
                 }`}
               >
                 {w}
@@ -121,17 +121,17 @@ export default function AssetMapSimulation() {
           <div className="space-y-6">
             {TEXT_BLOCKS.map((block) => (
               <div key={block.title} className="flex gap-4">
-                <div className="shrink-0 w-1.5 rounded-full bg-indigo-200 mt-1" />
+                <div className="shrink-0 w-1.5 rounded-full bg-brand-cyan mt-1" />
                 <div>
-                  <h3 className="font-bold text-slate-900 mb-1">{block.title}</h3>
+                  <h3 className="font-bold text-brand-primary mb-1">{block.title}</h3>
                   <p className="text-sm text-slate-600 leading-relaxed">{block.text}</p>
                 </div>
               </div>
             ))}
 
             {/* Summary legend */}
-            <div className="mt-6 bg-slate-50 border border-slate-200 rounded-2xl p-5">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+            <div className="mt-6 bg-brand-surface border border-brand-cyan/20 rounded-2xl p-5">
+              <p className="text-xs font-semibold text-brand-primary/60 uppercase tracking-wider mb-3">
                 סיכום {activeWindow}
               </p>
               <div className="flex gap-6">
@@ -152,18 +152,19 @@ export default function AssetMapSimulation() {
           </div>
 
           {/* Map — left side in RTL */}
-          <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 bg-slate-100"
+          <div
+            className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border border-brand-cyan/20 bg-brand-surface"
             style={{
               backgroundImage:
-                "linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)",
+                "linear-gradient(to right, #C8E6F5 1px, transparent 1px), linear-gradient(to bottom, #C8E6F5 1px, transparent 1px)",
               backgroundSize: "40px 40px",
             }}
           >
             {/* Subtle map tint */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/60 to-slate-100/60" />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-cyan/5 to-brand-surface/80" />
 
             {/* Map label */}
-            <div className="absolute top-3 start-3 bg-white/80 backdrop-blur-sm text-slate-600 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 z-10">
+            <div className="absolute top-3 start-3 bg-white/90 backdrop-blur-sm text-brand-primary text-xs font-medium px-3 py-1.5 rounded-lg border border-brand-cyan/20 z-10">
               אזור גוש דן
             </div>
 
@@ -184,7 +185,6 @@ export default function AssetMapSimulation() {
                       isHovered ? "scale-150" : ""
                     }`}
                   />
-                  {/* Tooltip */}
                   {isHovered && (
                     <div
                       className={`absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold px-2 py-1 rounded-lg shadow-lg z-20 ${LABEL_CLASSES[u]}`}
