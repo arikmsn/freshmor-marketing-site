@@ -20,6 +20,8 @@ const INITIAL_STATE: FormState = {
 export default function ContactSection() {
   const [form, setForm]           = useState<FormState>(INITIAL_STATE);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState<string | null>(null);
 
   const ref    = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.15 });
@@ -30,9 +32,23 @@ export default function ContactSection() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("server error");
+      setSubmitted(true);
+    } catch {
+      setError("אירעה שגיאה בשליחה. נסו שוב או כתבו ישירות ל info@freshmor.co.il");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -89,6 +105,7 @@ export default function ContactSection() {
                   name="name"
                   type="text"
                   required
+                  aria-required="true"
                   value={form.name}
                   onChange={handleChange}
                   placeholder="שם פרטי ושם משפחה"
@@ -106,6 +123,7 @@ export default function ContactSection() {
                   name="phone"
                   type="tel"
                   required
+                  aria-required="true"
                   value={form.phone}
                   onChange={handleChange}
                   placeholder="050-0000000"
@@ -145,10 +163,18 @@ export default function ContactSection() {
                 />
               </div>
 
+              {/* Error message */}
+              {error && (
+                <p role="alert" className="text-sm text-red-600 leading-relaxed">
+                  {error}
+                </p>
+              )}
+
               {/* Submit — pulse glow once on view */}
               <motion.button
                 type="submit"
-                className="w-full bg-brand-cyan hover:bg-brand-cyan-dark text-brand-primary font-bold py-3 rounded-lg transition-colors text-sm mt-2"
+                disabled={loading}
+                className="w-full bg-brand-cyan hover:bg-brand-cyan-dark text-brand-primary font-bold py-3 rounded-lg transition-colors text-sm mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 animate={inView ? {
                   boxShadow: [
                     "0 0 0 0px rgba(22,183,232,0)",
@@ -157,10 +183,10 @@ export default function ContactSection() {
                   ],
                 } : {}}
                 transition={{ duration: 1.4, delay: 0.8 }}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: loading ? 1 : 1.01 }}
+                whileTap={{ scale: loading ? 1 : 0.98 }}
               >
-                שלחו פרטים ונחזור אליכם בהקדם.
+                {loading ? "שולח..." : "שלחו פרטים ונחזור אליכם בהקדם."}
               </motion.button>
             </form>
           )}

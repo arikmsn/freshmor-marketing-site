@@ -59,13 +59,30 @@ export default function TrustSection() {
 
         {/* Social proof line */}
         <motion.p
-          className="text-center text-slate-500 text-base font-medium mb-14"
+          className="text-center text-slate-500 text-base font-medium mb-6"
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.15 }}
         >
           מצטרפים לחברות מובילות בתחומן
         </motion.p>
+
+        {/* Company name pills */}
+        <motion.div
+          className="flex flex-wrap justify-center gap-3 mb-14"
+          initial={{ opacity: 0, y: 12 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.55, delay: 0.28 }}
+        >
+          {["פרוטוס", "נובה", "אויר נקי", "מכמורת", "מדיקל הום"].map((name) => (
+            <span
+              key={name}
+              className="bg-white border border-gray-200 rounded-full px-6 py-3 text-brand-primary font-medium text-sm shadow-sm"
+            >
+              {name}
+            </span>
+          ))}
+        </motion.div>
 
         {/* Principles */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
