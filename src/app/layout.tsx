@@ -9,8 +9,8 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "Freshmor – ניהול השכרות חכם",
-  description: "פלטפורמת ניהול השכרות לעסקים קטנים ובינוניים",
+  title: "פרשמור – ניהול נכסי שטח חכם",
+  description: "פלטפורמת ניהול נכסי שטח לעסקים שהציוד שלהם עובד אצל הלקוחות",
 };
 
 export default function RootLayout({

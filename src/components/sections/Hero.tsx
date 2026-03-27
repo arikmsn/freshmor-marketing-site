@@ -68,7 +68,7 @@ export default function Hero() {
                   <div className="w-[200px]">
                     <PhoneFrame
                       src="/stuff/Main.png"
-                      alt="מסך הבית של פרשמור — ניהול נכסי שטח"
+                      alt="מסך הבית של פרשמור, ניהול נכסי שטח"
                       priority
                     />
                   </div>
@@ -166,7 +166,7 @@ export default function Hero() {
               >
                 <PhoneFrame
                   src="/stuff/Main.png"
-                  alt="מסך הבית של פרשמור — ניהול נכסי שטח"
+                  alt="מסך הבית של פרשמור, ניהול נכסי שטח"
                   priority
                 />
               </motion.div>

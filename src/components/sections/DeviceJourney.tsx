@@ -11,7 +11,7 @@ const STEPS = [
     label: "מחסן",
     sublabel: "הציוד ממתין לפריסה",
     screenshot: "/stuff/Main.png",
-    screenshotAlt: "מסך הבית של פרשמור — מלאי ונכסים",
+    screenshotAlt: "מסך הבית של פרשמור, מלאי ונכסים",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
@@ -24,7 +24,7 @@ const STEPS = [
     label: "פריסה",
     sublabel: "מותקן אצל הלקוח",
     screenshot: "/stuff/Jobs.png",
-    screenshotAlt: "רשימת משימות פרשמור — כרטיסי עבודה",
+    screenshotAlt: "רשימת משימות פרשמור, כרטיסי עבודה",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
@@ -37,7 +37,7 @@ const STEPS = [
     label: "ביקור",
     sublabel: "ביקור ביניים ותיעוד",
     screenshot: "/stuff/WorkOrder.png",
-    screenshotAlt: "כרטיס עבודה פרשמור — פרטי ביקור",
+    screenshotAlt: "כרטיס עבודה פרשמור, פרטי ביקור",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
@@ -50,7 +50,7 @@ const STEPS = [
     label: "החזרה",
     sublabel: "נאסף ומוחזר למחסן",
     screenshot: "/stuff/Map.png",
-    screenshotAlt: "מפת נכסים פרשמור — תכנון איסוף",
+    screenshotAlt: "מפת נכסים פרשמור, תכנון איסוף",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
@@ -122,10 +122,10 @@ export default function DeviceJourney() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <h2 className="text-3xl md:text-4xl font-bold text-brand-primary mb-4">
-            המסע של מכשיר מהמחסן ועד החזרה
+            מהמחסן ועד החזרה — המסלול המלא של הציוד שלכם
           </h2>
           <p className="text-lg text-slate-600 leading-relaxed">
-            פרשמור עוקבת אחרי כל נכס בכל שלב — מהפריסה הראשונה ועד לאיסוף הסופי. לא עוד ניחושות, לא עוד אובדן.
+            פרשמור עוקבת אחרי כל נכס בכל שלב. מהפריסה הראשונה ועד האיסוף הסופי, בלי אובדן ובלי הפתעות.
           </p>
           <button
             onClick={playJourney}

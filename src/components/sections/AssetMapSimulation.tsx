@@ -51,9 +51,9 @@ const TOOLTIP_BADGE: Record<Urgency, string> = {
 };
 
 const URGENCY_LABELS: Record<Urgency, string> = {
-  red:    "חריג — דחוף לאיסוף",
-  yellow: "בקרוב — לתכנן",
-  green:  "בזמן — תקין",
+  red:    "חריג: דחוף לאיסוף",
+  yellow: "בקרוב: לתכנן",
+  green:  "בזמן: תקין",
 };
 
 const TIME_WINDOWS: TimeWindow[] = ["היום", "מחר", "שבוע הבא"];
