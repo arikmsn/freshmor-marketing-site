@@ -77,48 +77,130 @@ export default function AssetMapSimulation() {
   const counts = countByUrgency(activeWindow);
 
   return (
-    <section id="asset-map-simulation" className="bg-white py-20 lg:py-28">
+    /* scroll-mt-16 accounts for the sticky header height so the anchor lands correctly */
+    <section id="asset-map-simulation" className="bg-white py-20 lg:py-28 scroll-mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
+        {/* Section header */}
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-brand-primary mb-4">
             לתכנן את השבוע בחמש דקות, לא בחמש שעות
           </h2>
           <p className="text-lg text-slate-600 leading-relaxed">
             יומן העבודה של פרשמור הוא המוח הלוגיסטי שלכם. הוא יודע מתי הציוד צריך לחזור, ומאפשר לכם לנהל את הלו&quot;ז בצורה פשוטה.
           </p>
+          <p className="text-sm text-slate-500 mt-3 leading-relaxed">
+            מפת הנכסים של פרשמור היא לא רק תמונה, היא כלי עבודה. המערכת מנתחת את זמני השהייה של הציוד בשטח וצובעת לכם את סדרי העדיפויות.
+          </p>
         </div>
 
-        {/* Intro text */}
-        <p className="text-center text-slate-600 max-w-2xl mx-auto mb-10 text-sm leading-relaxed">
-          מפת הנכסים של פרשמור היא לא רק תמונה, היא כלי עבודה. המערכת מנתחת את זמני השהייה של הציוד בשטח וצובעת לכם את סדרי העדיפויות, כדי ששום מכשיר לא יישכח ושום נסיעה לא תתבצע לחינם.
-        </p>
+        {/*
+          Two-column grid on desktop, single column on mobile.
 
-        {/* Time window selector */}
-        <div className="flex justify-center mb-10">
-          <div className="inline-flex rounded-xl border border-brand-cyan/20 bg-brand-surface p-1 gap-1">
-            {TIME_WINDOWS.map((w) => (
-              <button
-                key={w}
-                onClick={() => setActiveWindow(w)}
-                className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  activeWindow === w
-                    ? "bg-brand-primary text-white shadow-sm"
-                    : "text-brand-primary hover:text-brand-primary/70"
-                }`}
-              >
-                {w}
-              </button>
-            ))}
+          DOM order (drives mobile layout):
+            1. Interactive module (buttons → map → legend)   ← always on top on mobile
+            2. Text blocks                                    ← below on mobile
+
+          On desktop (lg), lg:order-* swaps them:
+            - Interactive module → lg:order-last  = visual LEFT column  (RTL end)
+            - Text blocks        → lg:order-first = visual RIGHT column (RTL start)
+        */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 lg:items-center">
+
+          {/* ── Interactive module ─────────────────────────────────────── */}
+          <div className="lg:order-last flex flex-col gap-4">
+
+            {/* 1. Time-window buttons */}
+            <div className="flex justify-center">
+              <div className="inline-flex rounded-xl border border-brand-cyan/20 bg-brand-surface p-1 gap-1">
+                {TIME_WINDOWS.map((w) => (
+                  <button
+                    key={w}
+                    onClick={() => setActiveWindow(w)}
+                    className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                      activeWindow === w
+                        ? "bg-brand-primary text-white shadow-sm"
+                        : "text-brand-primary hover:text-brand-primary/70"
+                    }`}
+                  >
+                    {w}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. Map card */}
+            <div
+              className="relative w-full h-[260px] sm:h-[320px] lg:h-auto lg:aspect-[4/3] rounded-2xl overflow-hidden border border-brand-cyan/20 bg-brand-surface"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, #C8E6F5 1px, transparent 1px), linear-gradient(to bottom, #C8E6F5 1px, transparent 1px)",
+                backgroundSize: "40px 40px",
+              }}
+            >
+              {/* Subtle tint */}
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-cyan/5 to-brand-surface/80" />
+
+              {/* Region label — top-start (right in RTL) */}
+              <div className="absolute top-3 start-3 bg-white/90 backdrop-blur-sm text-brand-primary text-xs font-medium px-3 py-1.5 rounded-lg border border-brand-cyan/20 z-10">
+                אזור גוש דן
+              </div>
+
+              {/* Site dots */}
+              {SITES.map((site) => {
+                const u = urgency[site.id];
+                const isHovered = hoveredSite === site.id;
+                return (
+                  <div
+                    key={site.id}
+                    className="absolute z-10 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+                    style={{ left: `${site.x}%`, top: `${site.y}%` }}
+                    onMouseEnter={() => setHoveredSite(site.id)}
+                    onMouseLeave={() => setHoveredSite(null)}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full transition-all duration-500 ${DOT_CLASSES[u]} ${
+                        isHovered ? "scale-150" : ""
+                      }`}
+                    />
+                    {isHovered && (
+                      <div
+                        className={`absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold px-2 py-1 rounded-lg shadow-lg z-20 ${LABEL_CLASSES[u]}`}
+                      >
+                        {site.name} — {URGENCY_LABELS[u]}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 3. Legend / summary */}
+            <div className="bg-brand-surface border border-brand-cyan/20 rounded-2xl px-5 py-4">
+              <p className="text-xs font-semibold text-brand-primary/60 uppercase tracking-wider mb-3">
+                סיכום {activeWindow}
+              </p>
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-red-500 shrink-0" />
+                  <span className="text-sm font-medium text-slate-700">{counts.red} דחופים לאיסוף</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-amber-400 shrink-0" />
+                  <span className="text-sm font-medium text-slate-700">{counts.yellow} בקרוב</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="text-sm font-medium text-slate-700">{counts.green} תקינים</span>
+                </div>
+              </div>
+            </div>
+
           </div>
-        </div>
+          {/* ── end interactive module ──────────────────────────────────── */}
 
-        {/* Main content: map + text blocks */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-
-          {/* Text blocks — right side in RTL */}
-          <div className="space-y-6">
+          {/* ── Text blocks ─────────────────────────────────────────────── */}
+          <div className="lg:order-first space-y-6">
             {TEXT_BLOCKS.map((block) => (
               <div key={block.title} className="flex gap-4">
                 <div className="shrink-0 w-1.5 rounded-full bg-brand-cyan mt-1" />
@@ -128,74 +210,8 @@ export default function AssetMapSimulation() {
                 </div>
               </div>
             ))}
-
-            {/* Summary legend */}
-            <div className="mt-6 bg-brand-surface border border-brand-cyan/20 rounded-2xl p-5">
-              <p className="text-xs font-semibold text-brand-primary/60 uppercase tracking-wider mb-3">
-                סיכום {activeWindow}
-              </p>
-              <div className="flex gap-6">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
-                  <span className="text-sm font-medium text-slate-700">{counts.red} דחופים לאיסוף</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-amber-400 inline-block" />
-                  <span className="text-sm font-medium text-slate-700">{counts.yellow} בקרוב</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" />
-                  <span className="text-sm font-medium text-slate-700">{counts.green} תקינים</span>
-                </div>
-              </div>
-            </div>
           </div>
-
-          {/* Map — left side in RTL */}
-          <div
-            className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border border-brand-cyan/20 bg-brand-surface"
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, #C8E6F5 1px, transparent 1px), linear-gradient(to bottom, #C8E6F5 1px, transparent 1px)",
-              backgroundSize: "40px 40px",
-            }}
-          >
-            {/* Subtle map tint */}
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-cyan/5 to-brand-surface/80" />
-
-            {/* Map label */}
-            <div className="absolute top-3 start-3 bg-white/90 backdrop-blur-sm text-brand-primary text-xs font-medium px-3 py-1.5 rounded-lg border border-brand-cyan/20 z-10">
-              אזור גוש דן
-            </div>
-
-            {/* Site dots */}
-            {SITES.map((site) => {
-              const u = urgency[site.id];
-              const isHovered = hoveredSite === site.id;
-              return (
-                <div
-                  key={site.id}
-                  className="absolute z-10 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-                  style={{ left: `${site.x}%`, top: `${site.y}%` }}
-                  onMouseEnter={() => setHoveredSite(site.id)}
-                  onMouseLeave={() => setHoveredSite(null)}
-                >
-                  <div
-                    className={`w-4 h-4 rounded-full transition-all duration-500 ${DOT_CLASSES[u]} ${
-                      isHovered ? "scale-150" : ""
-                    }`}
-                  />
-                  {isHovered && (
-                    <div
-                      className={`absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold px-2 py-1 rounded-lg shadow-lg z-20 ${LABEL_CLASSES[u]}`}
-                    >
-                      {site.name} — {URGENCY_LABELS[u]}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          {/* ── end text blocks ─────────────────────────────────────────── */}
 
         </div>
       </div>
