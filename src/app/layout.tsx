@@ -9,7 +9,7 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "פרשמור – ניהול נכסי שטח חכם",
+  title: "פרשמור | ניהול נכסי שטח חכם",
   description: "פלטפורמת ניהול נכסי שטח לעסקים שהציוד שלהם עובד אצל הלקוחות",
 };
 

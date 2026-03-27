@@ -57,21 +57,15 @@ export default function TrustSection() {
           </p>
         </motion.div>
 
-        {/* Logo placeholder row */}
-        <div className="flex flex-wrap justify-center gap-6 mb-16">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="h-14 w-36 rounded-xl bg-brand-surface flex items-center justify-center text-slate-400 text-xs font-medium border border-brand-cyan/15"
-              initial={{ opacity: 0, y: 16 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.1 + i * 0.07 }}
-              whileHover={{ borderColor: "rgba(22,183,232,0.35)", scale: 1.03, transition: { duration: 0.2 } }}
-            >
-              לוגו לקוח
-            </motion.div>
-          ))}
-        </div>
+        {/* Social proof line */}
+        <motion.p
+          className="text-center text-slate-500 text-base font-medium mb-14"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.15 }}
+        >
+          מצטרפים לחברות מובילות בתחומן
+        </motion.p>
 
         {/* Principles */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

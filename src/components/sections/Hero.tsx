@@ -51,28 +51,27 @@ export default function Hero() {
             </p>
 
             {/* ── Mobile-only phone — between headline and bullets ─────────── */}
-            {/* Visible only below lg breakpoint; desktop shows the dedicated visual column */}
+            {/* Visible only below lg; 75% of viewport width, centered */}
             <div className="lg:hidden flex justify-center">
-              <div className="relative">
-                {/* Ambient cyan glow on the dark hero bg */}
+              <div className="relative w-3/4 max-w-xs">
+                {/* Ambient cyan glow */}
                 <div
                   className="absolute inset-0 -z-10"
                   style={{
-                    background: "radial-gradient(ellipse at center, rgba(22,183,232,0.2) 0%, transparent 70%)",
+                    background: "radial-gradient(ellipse at center, rgba(22,183,232,0.22) 0%, transparent 70%)",
                     filter: "blur(28px)",
-                    transform: "scale(1.6)",
+                    transform: "scale(1.5)",
                   }}
                 />
-                {/* Framed card behind the phone for intentional composition */}
-                <div className="bg-brand-primary/60 backdrop-blur-sm rounded-3xl p-5 border border-brand-cyan/20 shadow-2xl">
-                  <div className="w-[200px]">
-                    <PhoneFrame
-                      src="/stuff/Main.png"
-                      alt="מסך הבית של פרשמור, ניהול נכסי שטח"
-                      priority
-                    />
-                  </div>
-                  {/* Mini chips under the phone inside the card */}
+                {/* Framed card */}
+                <div className="bg-brand-primary/60 backdrop-blur-sm rounded-3xl p-4 border border-brand-cyan/20 shadow-2xl">
+                  <PhoneFrame
+                    src="/stuff/Main.png"
+                    alt="מסך הבית של פרשמור, ניהול נכסי שטח"
+                    className="w-full"
+                    priority
+                  />
+                  {/* Mini chips */}
                   <div className="flex items-center justify-between mt-3 px-1">
                     <div className="flex items-center gap-1.5 bg-white/10 rounded-lg px-2.5 py-1.5">
                       <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />

@@ -122,7 +122,7 @@ export default function DeviceJourney() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <h2 className="text-3xl md:text-4xl font-bold text-brand-primary mb-4">
-            מהמחסן ועד החזרה — המסלול המלא של הציוד שלכם
+            מהמחסן ועד החזרה. המסלול המלא של הציוד שלכם
           </h2>
           <p className="text-lg text-slate-600 leading-relaxed">
             פרשמור עוקבת אחרי כל נכס בכל שלב. מהפריסה הראשונה ועד האיסוף הסופי, בלי אובדן ובלי הפתעות.
@@ -141,11 +141,11 @@ export default function DeviceJourney() {
         {/* ── Desktop: 4-column horizontal timeline ──────────────────────── */}
         <div className="hidden lg:block relative">
 
-          {/* Rail */}
-          <div className="absolute top-[52px] inset-x-16 h-px bg-brand-cyan/20 z-0" />
+          {/* Rail — xl only (4-col layout) */}
+          <div className="hidden xl:block absolute top-[52px] inset-x-16 h-px bg-brand-cyan/20 z-0" />
           {/* Animated fill on rail */}
           <motion.div
-            className="absolute top-[52px] h-px bg-brand-cyan z-0"
+            className="hidden xl:block absolute top-[52px] h-px bg-brand-cyan z-0"
             style={{ right: "4rem" }}
             animate={{
               width:
@@ -158,7 +158,7 @@ export default function DeviceJourney() {
             transition={{ duration: 0.7, ease: "easeOut" }}
           />
 
-          <div className="grid grid-cols-4 gap-8 relative z-10 pt-2 pb-6">
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-8 relative z-10 pt-2 pb-6">
             {STEPS.map((step, index) => {
               const isActive  = activeStep !== null && step.id <= activeStep;
               const isCurrent = step.id === activeStep;
@@ -237,16 +237,10 @@ export default function DeviceJourney() {
         </div>
 
         {/* ── Mobile: single-phone swiper ─────────────────────────────────── */}
-        {/*
-          Shows one large phone at a time.
-          – Step indicator pills at top (tap to jump).
-          – Prev / Next arrow buttons below.
-          – Syncs with the play animation via mobileDisplayStep.
-        */}
         <div className="lg:hidden">
 
           {/* Step indicator pills */}
-          <div className="flex justify-center gap-2 mb-8">
+          <div className="flex justify-center gap-2 mb-5">
             {STEPS.map((step, i) => (
               <button
                 key={step.id}
@@ -261,38 +255,41 @@ export default function DeviceJourney() {
             ))}
           </div>
 
-          {/* Large phone — AnimatePresence for cross-fade on step change */}
-          <div className="flex justify-center mb-6" style={{ minHeight: "360px" }}>
+          {/* Phone card — gives the phone a visible surface + shadow */}
+          <div className="flex justify-center mb-4">
             <AnimatePresence mode="wait">
               <motion.div
                 key={mobileDisplayStep}
-                className="relative flex flex-col items-center"
-                initial={{ opacity: 0, y: 12 }}
+                className="relative w-3/4 max-w-[280px]"
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
+                exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {/* Device dot badge when this step is the animation's current */}
+                {/* Active step pulse badge */}
                 {activeStep === STEPS[mobileDisplayStep].id && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                     <DeviceDot />
                   </div>
                 )}
-                <motion.div
-                  className="w-[210px]"
-                  animate={{
-                    filter:
-                      activeStep === STEPS[mobileDisplayStep].id
-                        ? "drop-shadow(0 0 20px rgba(22,183,232,0.55))"
-                        : "drop-shadow(0 6px 20px rgba(0,0,0,0.18))",
-                  }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <PhoneFrame
-                    src={STEPS[mobileDisplayStep].screenshot}
-                    alt={STEPS[mobileDisplayStep].screenshotAlt}
-                  />
-                </motion.div>
+                {/* Card surface */}
+                <div className="bg-brand-surface rounded-3xl shadow-md border border-brand-cyan/20 p-4">
+                  <motion.div
+                    animate={{
+                      filter:
+                        activeStep === STEPS[mobileDisplayStep].id
+                          ? "drop-shadow(0 0 18px rgba(22,183,232,0.5))"
+                          : "none",
+                    }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <PhoneFrame
+                      src={STEPS[mobileDisplayStep].screenshot}
+                      alt={STEPS[mobileDisplayStep].screenshotAlt}
+                      className="w-full"
+                    />
+                  </motion.div>
+                </div>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -301,7 +298,7 @@ export default function DeviceJourney() {
           <AnimatePresence mode="wait">
             <motion.div
               key={`label-${mobileDisplayStep}`}
-              className="text-center mb-7"
+              className="text-center mb-5"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -313,13 +310,13 @@ export default function DeviceJourney() {
               <h3 className="font-bold text-brand-primary text-lg">
                 {STEPS[mobileDisplayStep].label}
               </h3>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm text-slate-500 mt-0.5">
                 {STEPS[mobileDisplayStep].sublabel}
               </p>
             </motion.div>
           </AnimatePresence>
 
-          {/* Prev / Next navigation */}
+          {/* Prev / Next navigation — 44px touch targets */}
           <div className="flex justify-center items-center gap-4">
             <button
               onClick={() => goMobileStep(mobileDisplayStep - 1)}
@@ -328,16 +325,13 @@ export default function DeviceJourney() {
               className="w-11 h-11 rounded-xl border-2 border-slate-200 flex items-center justify-center text-slate-500
                          hover:border-brand-cyan hover:text-brand-primary disabled:opacity-30 transition-colors"
             >
-              {/* Chevron pointing right = "previous" in RTL */}
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
-
             <span className="text-sm text-slate-500 font-semibold tabular-nums w-12 text-center">
               {mobileDisplayStep + 1} / {STEPS.length}
             </span>
-
             <button
               onClick={() => goMobileStep(mobileDisplayStep + 1)}
               disabled={mobileDisplayStep === STEPS.length - 1}
@@ -345,7 +339,6 @@ export default function DeviceJourney() {
               className="w-11 h-11 rounded-xl border-2 border-slate-200 flex items-center justify-center text-slate-500
                          hover:border-brand-cyan hover:text-brand-primary disabled:opacity-30 transition-colors"
             >
-              {/* Chevron pointing left = "next" in RTL */}
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>

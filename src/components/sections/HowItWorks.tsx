@@ -41,7 +41,7 @@ export default function HowItWorks() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <h2 className="text-3xl md:text-4xl font-bold text-brand-primary mb-4">
-            מפה לשם, ב-4 צעדים פשוטים
+            ארבעה צעדים פשוטים להתחלה
           </h2>
           <p className="text-slate-600 text-lg leading-relaxed">
             הטמעה חלקה בלי פרויקטים מסובכים. רוב הלקוחות פעילים בשטח תוך שבוע.

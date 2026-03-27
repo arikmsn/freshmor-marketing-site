@@ -15,7 +15,7 @@ interface Site {
 }
 
 const SITES: Site[] = [
-  { id: 1, name: "תל אביב - מרכז",  type: "יבשן תעשייתי",  x: 38, y: 48 },
+  { id: 1, name: "תל אביב מרכז",   type: "יבשן תעשייתי",  x: 38, y: 48 },
   { id: 2, name: "הרצליה",           type: "חיישן לחות",     x: 30, y: 20 },
   { id: 3, name: "פתח תקווה",        type: "מכשיר בישום",    x: 57, y: 30 },
   { id: 4, name: "ראשון לציון",      type: "לוכד מזיקים",    x: 34, y: 65 },
@@ -160,61 +160,64 @@ export default function AssetMapSimulation() {
           {/* Card inner padding */}
           <div className="p-5 sm:p-8 lg:p-10">
 
-            {/* Card eyebrow label */}
-            <div className="flex items-center gap-2.5 mb-7">
-              <span className="w-2 h-2 rounded-full bg-brand-cyan shrink-0" />
-              <span className="text-sm font-semibold text-brand-primary/70 tracking-wide">
-                מפת הנכסים בפעולה
-              </span>
-              {isPlaying && (
-                <span className="flex items-center gap-1 text-xs text-brand-cyan font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-                  מצגת פעילה
+            {/* ── Card header: eyebrow label + time controls in one unified row ── */}
+            {/* On mobile: stacks to two rows (label above, controls below).        */}
+            {/* On desktop: single row with label on the right, controls on the left. */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-7">
+              {/* Eyebrow label (RTL: appears on the right) */}
+              <div className="flex items-center gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-brand-cyan shrink-0" />
+                <span className="text-sm font-semibold text-brand-primary/70 tracking-wide">
+                  מפת הנכסים בפעולה
                 </span>
-              )}
+                {isPlaying && (
+                  <span className="flex items-center gap-1 text-xs text-brand-cyan font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+                    מצגת פעילה
+                  </span>
+                )}
+              </div>
+              {/* Time-window buttons + play/pause */}
+              <div className="flex items-center gap-3">
+                <div className="inline-flex rounded-xl border border-brand-cyan/25 bg-white/80 p-1 gap-1 shadow-sm">
+                  {TIME_WINDOWS.map((w) => (
+                    <button
+                      key={w}
+                      onClick={() => handleWindowClick(w)}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                        activeWindow === w
+                          ? "bg-brand-primary text-white shadow-sm"
+                          : "text-brand-primary hover:text-brand-primary/70"
+                      }`}
+                    >
+                      {w}
+                    </button>
+                  ))}
+                </div>
+                {/* Play / Pause */}
+                <button
+                  onClick={togglePlay}
+                  aria-label={isPlaying ? "השהה" : "הפעל חיזרה אוטומטית"}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border shadow-sm ${
+                    isPlaying
+                      ? "bg-brand-primary text-white border-brand-primary"
+                      : "bg-white text-brand-primary border-brand-cyan/25 hover:border-brand-cyan/50"
+                  }`}
+                >
+                  {isPlaying ? <PauseIcon /> : <PlayIcon />}
+                </button>
+              </div>
             </div>
 
             {/*
               Two-column grid on desktop.
-              DOM order drives mobile: interactive module first (buttons→map→legend), text below.
-              lg:order-* swaps them visually on desktop (interactive = left / text = right in RTL).
+              DOM order drives mobile: map first, then legend, then text blocks.
+              lg:order-* swaps them visually on desktop (map = left / text = right in RTL).
             */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 lg:items-center">
 
               {/* ── Interactive module (DOM first → mobile top / desktop left) ── */}
               <div className="lg:order-last flex flex-col gap-4">
-
-                {/* 1. Time-window buttons + play/pause */}
-                <div className="flex items-center justify-center gap-3">
-                  <div className="inline-flex rounded-xl border border-brand-cyan/25 bg-white/80 p-1 gap-1 shadow-sm">
-                    {TIME_WINDOWS.map((w) => (
-                      <button
-                        key={w}
-                        onClick={() => handleWindowClick(w)}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                          activeWindow === w
-                            ? "bg-brand-primary text-white shadow-sm"
-                            : "text-brand-primary hover:text-brand-primary/70"
-                        }`}
-                      >
-                        {w}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Play / Pause button */}
-                  <button
-                    onClick={togglePlay}
-                    aria-label={isPlaying ? "השהה" : "הפעל חיזרה אוטומטית"}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border shadow-sm ${
-                      isPlaying
-                        ? "bg-brand-primary text-white border-brand-primary"
-                        : "bg-white text-brand-primary border-brand-cyan/25 hover:border-brand-cyan/50"
-                    }`}
-                  >
-                    {isPlaying ? <PauseIcon /> : <PlayIcon />}
-                  </button>
-                </div>
 
                 {/* 2. Map card */}
                 <div

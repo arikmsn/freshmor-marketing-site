@@ -106,7 +106,7 @@ export default function WhoItIsFor() {
 
         {/* Closing line */}
         <motion.p
-          className="mt-12 text-center text-slate-700 font-medium text-base max-w-3xl mx-auto leading-relaxed"
+          className="mt-8 text-center text-slate-700 font-medium text-base max-w-3xl mx-auto leading-relaxed"
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
           transition={{ delay: 0.7, duration: 0.6 }}

@@ -55,7 +55,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-white/10 text-center text-xs text-slate-500">
-          © 2025 פרשמור. כל הזכויות שמורות.
+          © 2026 פרשמור. כל הזכויות שמורות.
         </div>
       </div>
     </footer>
