@@ -35,7 +35,7 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={ref} className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
 
-          {/* ── Text column — visual RIGHT in RTL ──────────────────────────── */}
+          {/* ── Text column (visual RIGHT in RTL) ──────────────────────────── */}
           <motion.div
             className="space-y-7"
             initial={{ opacity: 0, y: 30 }}
@@ -50,38 +50,15 @@ export default function Hero() {
               הדור הבא של ניהול מערכי שטח, עם שקיפות מלאה מפריסה ועד החזרה, ניטור חכם של נכסים וחיסכון מוכח בעלויות התפעול.
             </p>
 
-            {/* ── Mobile-only phone — between headline and bullets ─────────── */}
-            {/* Visible only below lg; 75% of viewport width, centered */}
+            {/* ── Mobile phone — centered, 72% width, no box around it ──────── */}
             <div className="lg:hidden flex justify-center">
-              <div className="relative w-3/4 max-w-xs">
-                {/* Ambient cyan glow */}
-                <div
-                  className="absolute inset-0 -z-10"
-                  style={{
-                    background: "radial-gradient(ellipse at center, rgba(22,183,232,0.22) 0%, transparent 70%)",
-                    filter: "blur(28px)",
-                    transform: "scale(1.5)",
-                  }}
+              <div className="w-3/4 max-w-[260px]">
+                <PhoneFrame
+                  src="/stuff/Main.png"
+                  alt="מסך הבית של פרשמור, ניהול נכסי שטח"
+                  className="w-full"
+                  priority
                 />
-                {/* Framed card */}
-                <div className="bg-brand-primary/60 backdrop-blur-sm rounded-3xl p-4 border border-brand-cyan/20 shadow-2xl">
-                  <PhoneFrame
-                    src="/stuff/Main.png"
-                    alt="מסך הבית של פרשמור, ניהול נכסי שטח"
-                    className="w-full"
-                    priority
-                  />
-                  {/* Mini chips */}
-                  <div className="flex items-center justify-between mt-3 px-1">
-                    <div className="flex items-center gap-1.5 bg-white/10 rounded-lg px-2.5 py-1.5">
-                      <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
-                      <span className="text-[11px] font-semibold text-white/90">3 דחופים</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-brand-cyan/20 rounded-lg px-2.5 py-1.5">
-                      <span className="text-[11px] font-semibold text-brand-cyan">47 נכסים</span>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
             {/* ── end mobile phone ─────────────────────────────────────────── */}
@@ -111,7 +88,6 @@ export default function Hero() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.65 }}
             >
-              {/* Primary CTA — one-shot pulse glow on entry */}
               <motion.a
                 href="#contact"
                 className="bg-brand-cyan hover:bg-brand-cyan-dark text-brand-primary font-bold px-6 py-3.5 rounded-lg text-center transition-colors text-sm"
@@ -135,60 +111,34 @@ export default function Hero() {
             </motion.div>
           </motion.div>
 
-          {/* ── Desktop-only visual column — LEFT in RTL ────────────────────── */}
-          {/* Hidden on mobile; the phone is injected inline in the text column above */}
+          {/* ── Desktop phone visual (LEFT in RTL) ─────────────────────────── */}
+          {/* No containing box — just the phone with a blurred glow behind it */}
           <div className="hidden lg:flex items-center justify-center">
-            {/* Intentional framing card keeps the phone from floating */}
-            <div
-              className="relative rounded-3xl p-8 border border-brand-cyan/20"
-              style={{
-                background: "linear-gradient(135deg, rgba(13,43,78,0.8) 0%, rgba(6,23,43,0.95) 100%)",
-                boxShadow: "0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(22,183,232,0.1)",
-              }}
-            >
-              {/* Ambient glow behind phone */}
+            <div className="relative">
+              {/* Subtle cyan glow — decoration only, not a containing box */}
               <div
-                className="absolute inset-0 -z-10 rounded-3xl"
+                className="absolute inset-0 -z-10"
                 style={{
-                  background: "radial-gradient(ellipse at center, rgba(22,183,232,0.18) 0%, transparent 70%)",
-                  filter: "blur(32px)",
-                  transform: "scale(1.2)",
+                  background:
+                    "radial-gradient(ellipse at center, rgba(22,183,232,0.20) 0%, transparent 65%)",
+                  filter: "blur(48px)",
+                  transform: "scale(1.9)",
                 }}
               />
 
-              {/* Phone — slight tilt, enters from below */}
+              {/* Clean phone mockup — ~480px tall at this width */}
               <motion.div
-                initial={{ opacity: 0, y: 40, rotate: -4 }}
-                animate={inView ? { opacity: 1, y: 0, rotate: -2 } : {}}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-                className="w-[240px]"
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
+                className="w-[308px]"
               >
                 <PhoneFrame
                   src="/stuff/Main.png"
                   alt="מסך הבית של פרשמור, ניהול נכסי שטח"
+                  className="w-full"
                   priority
                 />
-              </motion.div>
-
-              {/* Floating chip — urgency count */}
-              <motion.div
-                className="absolute -bottom-3 -left-8 flex items-center gap-2 bg-white rounded-xl shadow-2xl px-3 py-2 z-20"
-                initial={{ opacity: 0, x: -18, y: 8 }}
-                animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
-                transition={{ duration: 0.55, delay: 0.85, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 animate-pulse" />
-                <span className="text-xs font-bold text-brand-primary whitespace-nowrap">3 דחופים לאיסוף</span>
-              </motion.div>
-
-              {/* Floating chip — total assets */}
-              <motion.div
-                className="absolute -top-3 -right-8 bg-brand-cyan rounded-xl shadow-xl px-3 py-2 z-20"
-                initial={{ opacity: 0, x: 18, y: -8 }}
-                animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
-                transition={{ duration: 0.55, delay: 1.0, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <span className="text-xs font-bold text-brand-primary whitespace-nowrap">47 נכסים בשטח</span>
               </motion.div>
             </div>
           </div>
