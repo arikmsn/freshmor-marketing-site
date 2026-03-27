@@ -2,6 +2,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/sections/Hero";
 import WhoItIsFor from "@/components/sections/WhoItIsFor";
+import DeviceJourney from "@/components/sections/DeviceJourney";
 import AssetMapSimulation from "@/components/sections/AssetMapSimulation";
 import ManagerBenefits from "@/components/sections/ManagerBenefits";
 import HowItWorks from "@/components/sections/HowItWorks";
@@ -15,6 +16,7 @@ export default function Home() {
       <main className="flex-1">
         <Hero />
         <WhoItIsFor />
+        <DeviceJourney />
         <AssetMapSimulation />
         <ManagerBenefits />
         <HowItWorks />

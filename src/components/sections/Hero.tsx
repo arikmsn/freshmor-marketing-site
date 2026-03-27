@@ -1,3 +1,9 @@
+"use client";
+
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
+import HeroAnimation from "./HeroAnimation";
+
 const BULLETS = [
   "מפת נכסים דינמית בזמן אמת: תצוגה ויזואלית חכמה של כל הציוד הפרוס בשטח, צבוע לפי דחיפות וסטטוס זמינות.",
   "תיעוד QR חד ערכי: סריקה מהירה בפריסה ובאיסוף שמונעת טעויות אנוש ומבטיחה שכל פריט רשום במקומו המדויק.",
@@ -21,13 +27,21 @@ function CheckIcon() {
 }
 
 export default function Hero() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.1 });
+
   return (
     <section className="bg-brand-dark text-white py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+        <div ref={ref} className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
 
           {/* Text column — appears on the right in RTL */}
-          <div className="space-y-7">
+          <motion.div
+            className="space-y-7"
+            initial={{ opacity: 0, y: 30 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          >
             <h1 className="text-4xl md:text-5xl font-bold leading-tight tracking-tight">
               שולטים על הציוד שעובד בשבילכם
             </h1>
@@ -38,38 +52,64 @@ export default function Hero() {
 
             <ul className="space-y-3.5">
               {BULLETS.map((bullet, i) => (
-                <li key={i} className="flex items-start gap-3">
+                <motion.li
+                  key={i}
+                  className="flex items-start gap-3"
+                  initial={{ opacity: 0, x: 16 }}
+                  animate={inView ? { opacity: 1, x: 0 } : {}}
+                  transition={{
+                    duration: 0.45,
+                    ease: [0.22, 1, 0.36, 1],
+                    delay: 0.2 + i * 0.07,
+                  }}
+                >
                   <CheckIcon />
                   <span className="text-slate-200 text-sm leading-relaxed">{bullet}</span>
-                </li>
+                </motion.li>
               ))}
             </ul>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-1">
-              <a
+            <motion.div
+              className="flex flex-col sm:flex-row gap-3 pt-1"
+              initial={{ opacity: 0, y: 16 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.65 }}
+            >
+              {/* Primary CTA — gentle pulse glow once on entry */}
+              <motion.a
                 href="#contact"
                 className="bg-brand-cyan hover:bg-brand-cyan-dark text-brand-primary font-bold px-6 py-3.5 rounded-lg text-center transition-colors text-sm"
+                animate={inView ? {
+                  boxShadow: [
+                    "0 0 0 0px rgba(22,183,232,0)",
+                    "0 0 0 8px rgba(22,183,232,0.22)",
+                    "0 0 0 0px rgba(22,183,232,0)",
+                  ],
+                } : {}}
+                transition={{ duration: 1.4, delay: 1.0 }}
               >
                 לתיאום דמו והצגת יכולות
-              </a>
+              </motion.a>
               <a
                 href="#asset-map-simulation"
                 className="border-2 border-brand-cyan/40 hover:border-brand-cyan text-white font-semibold px-6 py-3.5 rounded-lg text-center transition-colors text-sm"
               >
                 צפו בסימולציית מפת הנכסים
               </a>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
-          {/* Visual placeholder — appears on the left in RTL */}
-          <div className="hidden lg:flex items-center justify-center">
-            <div className="w-full aspect-[4/3] rounded-2xl bg-brand-primary border border-brand-mid flex flex-col items-center justify-center gap-3 text-brand-cyan/40">
-              <svg className="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
-              <p className="text-sm text-brand-cyan/50">תצוגה מקדימה של מפת הנכסים</p>
+          {/* Animation column — appears on the left in RTL */}
+          <motion.div
+            className="hidden lg:flex items-center justify-center"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={inView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
+          >
+            <div className="w-full">
+              <HeroAnimation />
             </div>
-          </div>
+          </motion.div>
 
         </div>
       </div>

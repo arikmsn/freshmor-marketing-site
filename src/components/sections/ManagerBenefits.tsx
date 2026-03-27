@@ -1,3 +1,8 @@
+"use client";
+
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
+
 const BENEFITS = [
   {
     title: "פחות בלגן תפעולי",
@@ -39,31 +44,48 @@ const BENEFITS = [
 ];
 
 export default function ManagerBenefits() {
+  const ref    = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.15 });
+
   return (
     <section className="bg-brand-primary py-20 lg:py-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div className="text-center max-w-2xl mx-auto mb-14">
+        <motion.div
+          className="text-center max-w-2xl mx-auto mb-14"
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             מה מנהל האופרציה מרוויח?
           </h2>
           <p className="text-blue-200 text-lg leading-relaxed">
             פרשמור לא עוד כלי עבודה, היא מרכז הפיקוד של הצוות שלכם בשטח.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {BENEFITS.map((benefit) => (
-            <div
+          {BENEFITS.map((benefit, i) => (
+            <motion.div
               key={benefit.title}
-              className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors"
+              className="bg-white/5 border border-white/10 rounded-2xl p-6 cursor-default"
+              initial={{ opacity: 0, y: 28 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.15 + i * 0.08 }}
+              whileHover={{
+                backgroundColor: "rgba(255,255,255,0.1)",
+                borderColor: "rgba(22,183,232,0.3)",
+                y: -4,
+                transition: { duration: 0.2 },
+              }}
             >
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-cyan/20 text-brand-cyan mb-5">
                 {benefit.icon}
               </div>
               <h3 className="text-base font-bold text-white mb-2">{benefit.title}</h3>
               <p className="text-sm text-blue-200 leading-relaxed">{benefit.text}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
 

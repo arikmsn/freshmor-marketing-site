@@ -1,3 +1,8 @@
+"use client";
+
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
+
 const STEPS = [
   {
     number: "01",
@@ -22,35 +27,56 @@ const STEPS = [
 ];
 
 export default function HowItWorks() {
+  const ref    = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.15 });
+
   return (
     <section id="how-it-works" className="bg-brand-surface py-20 lg:py-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <motion.div
+          className="text-center max-w-2xl mx-auto mb-16"
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
           <h2 className="text-3xl md:text-4xl font-bold text-brand-primary mb-4">
             מפה לשם, ב-4 צעדים פשוטים
           </h2>
           <p className="text-slate-600 text-lg leading-relaxed">
             הטמעה חלקה בלי פרויקטים מסובכים. רוב הלקוחות פעילים בשטח תוך שבוע.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {STEPS.map((step, i) => (
-            <div key={step.number} className="relative">
+            <motion.div
+              key={step.number}
+              className="relative"
+              initial={{ opacity: 0, y: 28 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.1 + i * 0.1 }}
+            >
               {/* Connector line (desktop only, not after last item) */}
               {i < STEPS.length - 1 && (
-                <div className="hidden lg:block absolute top-6 start-full h-px bg-brand-cyan/30 z-0" style={{ width: 'calc(100% - 3rem)', insetInlineStart: '3rem' }} />
+                <div
+                  className="hidden lg:block absolute top-6 h-px bg-brand-cyan/30 z-0"
+                  style={{ insetInlineStart: "3rem", width: "calc(100% - 3rem)" }}
+                />
               )}
 
               <div className="relative z-10">
-                <div className="w-12 h-12 rounded-full bg-brand-cyan text-brand-primary font-bold text-sm flex items-center justify-center mb-5">
+                <motion.div
+                  className="w-12 h-12 rounded-full bg-brand-cyan text-brand-primary font-bold text-sm flex items-center justify-center mb-5"
+                  whileHover={{ scale: 1.1, boxShadow: "0 0 0 4px rgba(22,183,232,0.25)" }}
+                  transition={{ duration: 0.2 }}
+                >
                   {step.number}
-                </div>
+                </motion.div>
                 <h3 className="text-base font-bold text-brand-primary mb-2">{step.title}</h3>
                 <p className="text-sm text-slate-600 leading-relaxed">{step.text}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 

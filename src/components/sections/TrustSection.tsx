@@ -1,3 +1,8 @@
+"use client";
+
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
+
 const PRINCIPLES = [
   {
     title: "אמינות",
@@ -31,35 +36,53 @@ const PRINCIPLES = [
 ];
 
 export default function TrustSection() {
+  const ref    = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.15 });
+
   return (
     <section className="bg-white py-20 lg:py-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div className="text-center max-w-2xl mx-auto mb-14">
+        <motion.div
+          className="text-center max-w-2xl mx-auto mb-14"
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
           <h2 className="text-3xl md:text-4xl font-bold text-brand-primary mb-4">
             בנוי על אמון ושקיפות
           </h2>
           <p className="text-slate-600 text-lg leading-relaxed">
             חברות מובילות בתחומן כבר מנהלות את הנכסים שלהן עם פרשמור.
           </p>
-        </div>
+        </motion.div>
 
         {/* Logo placeholder row */}
         <div className="flex flex-wrap justify-center gap-6 mb-16">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div
+            <motion.div
               key={i}
               className="h-14 w-36 rounded-xl bg-brand-surface flex items-center justify-center text-slate-400 text-xs font-medium border border-brand-cyan/15"
+              initial={{ opacity: 0, y: 16 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.1 + i * 0.07 }}
+              whileHover={{ borderColor: "rgba(22,183,232,0.35)", scale: 1.03, transition: { duration: 0.2 } }}
             >
               לוגו לקוח
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* Principles */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {PRINCIPLES.map((p) => (
-            <div key={p.title} className="flex gap-4 items-start">
+          {PRINCIPLES.map((p, i) => (
+            <motion.div
+              key={p.title}
+              className="flex gap-4 items-start"
+              initial={{ opacity: 0, y: 24 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.25 + i * 0.1 }}
+            >
               <div className="shrink-0 w-14 h-14 rounded-2xl bg-brand-cyan/10 text-brand-cyan flex items-center justify-center">
                 {p.icon}
               </div>
@@ -67,7 +90,7 @@ export default function TrustSection() {
                 <h3 className="font-bold text-brand-primary mb-1">{p.title}</h3>
                 <p className="text-sm text-slate-600 leading-relaxed">{p.text}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
