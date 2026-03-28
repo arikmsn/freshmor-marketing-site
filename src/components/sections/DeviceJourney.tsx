@@ -1,213 +1,171 @@
 "use client";
 
-import { motion, AnimatePresence, useInView } from "framer-motion";
-import { useRef, useState, useEffect, useCallback } from "react";
+import { motion, useInView } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, Lightbulb } from "lucide-react";
 
 /* ─── step data ────────────────────────────────────────────────────────────── */
-interface Step {
-  id: number;
-  label: string;
-  sublabel: string;
-  image: string;
-  imageAlt: string;
-  spotlightX: string;
-  spotlightY: string;
-  ringPx: number;
-  overlayOpacity: number;
-  callout: string;
-}
-
-const STEPS: Step[] = [
+const steps = [
   {
     id: 1,
     label: "מחסן",
-    sublabel: "הציוד ממתין לפריסה",
+    description: "הציוד ממתין לפריסה",
     image: "/stuff/Main.png",
-    imageAlt: "מסך הבית של פרשמור, מלאי ונכסים",
     spotlightX: "50%",
     spotlightY: "28%",
-    ringPx: 160,
-    overlayOpacity: 0.48,
+    spotlightRadius: 80,
+    overlayOpacity: 0.4,
     callout: "כל הנכסים ממתינים מסודרים. פרשמור יודעת מה יוצא, מתי ולאן.",
   },
   {
     id: 2,
     label: "פריסה",
-    sublabel: "מותקן אצל הלקוח",
+    description: "מותקן אצל הלקוח",
     image: "/stuff/WorkOrder.png",
-    imageAlt: "כרטיס עבודה פרשמור, פרטי פריסה",
     spotlightX: "25%",
     spotlightY: "45%",
-    ringPx: 160,
-    overlayOpacity: 0.48,
+    spotlightRadius: 80,
+    overlayOpacity: 0.4,
     callout: "כרטיס עבודה מפורט לכל פריסה. הטכנאי יודע בדיוק מה לעשות.",
   },
   {
     id: 3,
     label: "ביקור",
-    sublabel: "ביקור ביניים ותיעוד",
+    description: "ביקור ביניים ותיעוד",
     image: "/stuff/Jobs.png",
-    imageAlt: "רשימת משימות פרשמור, כרטיסי עבודה",
     spotlightX: "50%",
     spotlightY: "38%",
-    ringPx: 150,
-    overlayOpacity: 0.48,
-    callout: "רשימת המשימות מתעדכנת אוטומטית. אף ביקור לא נשכח.",
+    spotlightRadius: 75,
+    overlayOpacity: 0.4,
+    callout: "יומן העבודה מתעדכן אוטומטית. אף ביקור לא נשכח.",
   },
   {
     id: 4,
     label: "החזרה",
-    sublabel: "נאסף ומוחזר למחסן",
+    description: "נאסף ומוחזר למחסן",
     image: "/stuff/Map.png",
-    imageAlt: "מפת נכסים פרשמור, תכנון איסוף",
     spotlightX: "55%",
     spotlightY: "42%",
-    ringPx: 200,
+    spotlightRadius: 100,
     overlayOpacity: 0.25,
     callout: "המפה מראה בדיוק מה צריך לאסוף ואיפה. כל נסיעה שווה את הזמן.",
   },
 ];
 
-/* ─── spotlight sizes ──────────────────────────────────────────────────────── */
-const RING_PX_MOB  = 140; // mobile — fixed size
-const OUTER_PX_MOB = 158; // mobile outer ring
-
+/* ─── DeviceJourney ────────────────────────────────────────────────────────── */
 export default function DeviceJourney() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const inView     = useInView(sectionRef, { once: true, amount: 0.15 });
+  const sectionRef    = useRef<HTMLDivElement>(null);
+  const inView        = useInView(sectionRef, { once: true, amount: 0.15 });
+  const lastManualRef = useRef<number>(0);
 
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [paused,    setPaused]    = useState(false);
-  const [imageKey,  setImageKey]  = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
+  const [panelOpacity, setPanelOpacity] = useState(1);
 
-  const step = STEPS[activeIdx];
+  // Navigate to a step with a brief opacity fade
+  function goTo(i: number) {
+    if (i === activeStep) return;
+    lastManualRef.current = Date.now();
+    setPanelOpacity(0);
+    setTimeout(() => {
+      setActiveStep(i);
+      setPanelOpacity(1);
+    }, 200);
+  }
 
-  const goTo = useCallback((i: number) => {
-    if (i === activeIdx) return;
-    setPaused(true);
-    setActiveIdx(i);
-    setImageKey((k) => k + 1);
-  }, [activeIdx]);
-
-  // Auto-advance every 4s
+  // Auto-advance every 4s, skips if user clicked within the last 8s
   useEffect(() => {
-    if (paused) return;
-    const id = setTimeout(() => {
-      const next = (activeIdx + 1) % STEPS.length;
-      setActiveIdx(next);
-      setImageKey((k) => k + 1);
+    const id = setInterval(() => {
+      if (Date.now() - lastManualRef.current >= 8000) {
+        setPanelOpacity(0);
+        setTimeout(() => {
+          setActiveStep((s) => (s + 1) % steps.length);
+          setPanelOpacity(1);
+        }, 200);
+      }
     }, 4000);
-    return () => clearTimeout(id);
-  }, [activeIdx, paused]);
+    return () => clearInterval(id);
+  }, []);
 
-  /* ─── spotlight panel (shared between mobile + desktop) ─────────────────── */
-  function SpotlightPanel({
-    ringPx,
-    overlayOpacity,
-    minH,
-  }: {
-    ringPx: number;
-    overlayOpacity: number;
-    minH: string;
-  }) {
-    const radius   = ringPx / 2;
-    const outerPx  = ringPx + 20;
-    const halfOuter = outerPx / 2;
+  const s = steps[activeStep];
 
+  /* ─── spotlight panel JSX (inline — not a nested component) ─────────────── */
+  function spotlightPanel(minH: string, mobileRadius?: number) {
+    const radius = mobileRadius ?? s.spotlightRadius;
     return (
       <div
-        className="relative bg-white rounded-3xl shadow-xl overflow-hidden"
+        className="relative rounded-3xl shadow-xl overflow-hidden bg-slate-900"
         style={{ minHeight: minH }}
       >
-        {/* Image — fades on step change */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={imageKey}
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Image
-              key={`img-${activeIdx}`}
-              src={step.image}
-              alt={step.imageAlt}
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-              priority={activeIdx === 0}
-            />
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Radial-gradient overlay — hole at spotlight position */}
+        {/* Image + overlay wrapped for opacity fade */}
         <div
-          className="absolute inset-0 z-10 pointer-events-none"
           style={{
-            background: `radial-gradient(circle ${radius}px at ${step.spotlightX} ${step.spotlightY}, transparent ${radius}px, rgba(0,0,0,${overlayOpacity}) calc(${radius}px + 2px))`,
-          }}
-        />
-
-        {/* Outer decorative ring */}
-        <div
-          className="absolute z-20 rounded-full pointer-events-none"
-          style={{
-            width:  outerPx,
-            height: outerPx,
-            left:   `calc(${step.spotlightX} - ${halfOuter}px)`,
-            top:    `calc(${step.spotlightY} - ${halfOuter}px)`,
-            border: "2px solid rgba(255,255,255,0.35)",
-            transition: "left 400ms ease, top 400ms ease",
-          }}
-        />
-
-        {/* White spotlight ring */}
-        <div
-          className="absolute z-20 rounded-full pointer-events-none shadow-2xl"
-          style={{
-            width:  ringPx,
-            height: ringPx,
-            left:   `calc(${step.spotlightX} - ${radius}px)`,
-            top:    `calc(${step.spotlightY} - ${radius}px)`,
-            border: "4px solid white",
-            transition: "left 400ms ease, top 400ms ease",
-          }}
-        />
-
-        {/* Step name label — bottom interior of spotlight circle */}
-        <div
-          className="absolute z-30 pointer-events-none"
-          style={{
-            left:      step.spotlightX,
-            top:       `calc(${step.spotlightY} + ${radius - 24}px)`,
-            transform: "translateX(-50%)",
-            transition: "left 400ms ease, top 400ms ease",
+            position: "absolute",
+            inset: 0,
+            transition: "opacity 0.2s ease",
+            opacity: panelOpacity,
           }}
         >
-          <span className="bg-black/60 text-white text-xs font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap">
-            {step.label}
-          </span>
+          {/* Image */}
+          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+            <Image
+              key={activeStep}
+              src={s.image}
+              alt={s.label}
+              fill
+              style={{ objectFit: "cover" }}
+              priority
+            />
+          </div>
+
+          {/* Dark overlay with radial cutout */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: `radial-gradient(
+                circle ${radius}px
+                at ${s.spotlightX} ${s.spotlightY},
+                transparent ${radius - 2}px,
+                rgba(0,0,0,${s.overlayOpacity}) ${radius}px
+              )`,
+            }}
+          />
+
+          {/* White spotlight ring — centered on spotlight point */}
+          <div
+            style={{
+              position: "absolute",
+              left: s.spotlightX,
+              top: s.spotlightY,
+              transform: "translate(-50%, -50%)",
+              width: radius * 2,
+              height: radius * 2,
+              borderRadius: "50%",
+              border: "4px solid rgba(255,255,255,0.85)",
+              boxShadow:
+                "0 0 0 2px rgba(255,255,255,0.3), 0 8px 32px rgba(0,0,0,0.4)",
+              pointerEvents: "none",
+            }}
+          />
         </div>
 
-        {/* Callout box */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`callout-${activeIdx}`}
-            className="absolute bottom-0 start-0 end-0 z-30 p-4"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+        {/* Callout box — outside the fading wrapper so text doesn't flash */}
+        <div className="absolute bottom-0 start-0 end-0 z-20 p-4">
+          <div
+            style={{ transition: "opacity 0.2s ease", opacity: panelOpacity }}
+            className="bg-white shadow-md border-r-4 border-brand-cyan rounded-xl p-5 flex items-start gap-3"
           >
-            <div className="bg-white shadow-md border-r-4 border-brand-cyan rounded-xl p-5 flex items-start gap-3">
-              <Lightbulb className="w-4 h-4 text-brand-cyan shrink-0 mt-0.5" strokeWidth={2} aria-hidden />
-              <p className="text-sm font-medium text-brand-primary leading-relaxed">{step.callout}</p>
-            </div>
-          </motion.div>
-        </AnimatePresence>
+            <Lightbulb
+              className="w-4 h-4 text-brand-cyan shrink-0 mt-0.5"
+              strokeWidth={2}
+              aria-hidden
+            />
+            <p className="text-sm font-medium text-brand-primary leading-relaxed">
+              {s.callout}
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -233,23 +191,23 @@ export default function DeviceJourney() {
 
         {/* ══ MOBILE: horizontal tab bar + spotlight below ═══════════════ */}
         <div className="lg:hidden">
-          <div className="flex overflow-x-auto gap-2 pb-3 mb-5 scrollbar-none justify-center">
-            {STEPS.map((s, i) => (
+          <div className="flex overflow-x-auto gap-2 pb-3 mb-5 justify-center">
+            {steps.map((step, i) => (
               <button
-                key={s.id}
+                key={step.id}
                 onClick={() => goTo(i)}
-                aria-pressed={i === activeIdx}
+                aria-pressed={i === activeStep}
                 className={`shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                  i === activeIdx
+                  i === activeStep
                     ? "bg-brand-primary text-white shadow-sm"
                     : "bg-white text-slate-500 border border-slate-200 hover:border-brand-cyan/40"
                 }`}
               >
-                {s.label}
+                {step.label}
               </button>
             ))}
           </div>
-          <SpotlightPanel ringPx={RING_PX_MOB} overlayOpacity={0.48} minH="280px" />
+          {spotlightPanel("280px", 60)}
         </div>
 
         {/* ══ DESKTOP: step list (right) + spotlight (left) ═════════════ */}
@@ -262,11 +220,11 @@ export default function DeviceJourney() {
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
           >
-            {STEPS.map((s, i) => {
-              const isActive = i === activeIdx;
+            {steps.map((step, i) => {
+              const isActive = i === activeStep;
               return (
                 <button
-                  key={s.id}
+                  key={step.id}
                   onClick={() => goTo(i)}
                   className={`w-full text-right rounded-xl px-4 py-3 transition-all duration-200 cursor-pointer group ${
                     isActive
@@ -285,16 +243,26 @@ export default function DeviceJourney() {
                       {i + 1}
                     </span>
                     <div className="flex-1">
-                      <div className={`font-bold text-sm ${isActive ? "text-brand-primary" : "text-slate-600"}`}>
-                        {s.label}
+                      <div
+                        className={`font-bold text-sm ${
+                          isActive ? "text-brand-primary" : "text-slate-600"
+                        }`}
+                      >
+                        {step.label}
                       </div>
-                      <div className={`text-xs mt-0.5 ${isActive ? "text-brand-mid" : "text-slate-400"}`}>
-                        {s.sublabel}
+                      <div
+                        className={`text-xs mt-0.5 ${
+                          isActive ? "text-brand-mid" : "text-slate-400"
+                        }`}
+                      >
+                        {step.description}
                       </div>
                     </div>
                     <ChevronLeft
                       className={`w-4 h-4 shrink-0 transition-colors ${
-                        isActive ? "text-brand-cyan" : "text-slate-300 group-hover:text-slate-400"
+                        isActive
+                          ? "text-brand-cyan"
+                          : "text-slate-300 group-hover:text-slate-400"
                       }`}
                       strokeWidth={2}
                       aria-hidden
@@ -306,11 +274,11 @@ export default function DeviceJourney() {
 
             {/* Progress dots */}
             <div className="flex gap-1.5 px-4 pt-4">
-              {STEPS.map((_, i) => (
+              {steps.map((_, i) => (
                 <div
                   key={i}
                   className={`h-1 rounded-full transition-all duration-300 ${
-                    i === activeIdx ? "bg-brand-cyan w-8" : "bg-slate-300 w-4"
+                    i === activeStep ? "bg-brand-cyan w-8" : "bg-slate-300 w-4"
                   }`}
                 />
               ))}
@@ -323,7 +291,7 @@ export default function DeviceJourney() {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           >
-            <SpotlightPanel ringPx={step.ringPx} overlayOpacity={step.overlayOpacity} minH="420px" />
+            {spotlightPanel("420px")}
           </motion.div>
 
         </div>
