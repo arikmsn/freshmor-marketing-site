@@ -1,85 +1,100 @@
 "use client";
 
-import { motion, useInView, AnimatePresence } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
-import PhoneFrame from "@/components/common/PhoneFrame";
+import { motion, AnimatePresence, useInView } from "framer-motion";
+import { useRef, useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 
-const STEPS = [
+/* ─── step data ────────────────────────────────────────────────────────────── */
+interface Step {
+  id: number;
+  label: string;
+  sublabel: string;
+  image: string;
+  imageAlt: string;
+  spotlightX: string;
+  spotlightY: string;
+  callout: string;
+}
+
+const STEPS: Step[] = [
   {
     id: 1,
     label: "מחסן",
     sublabel: "הציוד ממתין לפריסה",
-    screenshot: "/stuff/Main.png",
-    screenshotAlt: "מסך הבית של פרשמור, מלאי ונכסים",
+    image: "/stuff/Main.png",
+    imageAlt: "מסך הבית של פרשמור, מלאי ונכסים",
+    spotlightX: "50%",
+    spotlightY: "30%",
+    callout: "כל הנכסים ממתינים מסודרים. פרשמור יודעת מה יוצא, מתי ולאן.",
   },
   {
     id: 2,
     label: "פריסה",
     sublabel: "מותקן אצל הלקוח",
-    screenshot: "/stuff/WorkOrder.png",
-    screenshotAlt: "כרטיס עבודה פרשמור, פרטי פריסה",
+    image: "/stuff/WorkOrder.png",
+    imageAlt: "כרטיס עבודה פרשמור, פרטי פריסה",
+    spotlightX: "50%",
+    spotlightY: "40%",
+    callout: "כרטיס עבודה מפורט לכל פריסה. הטכנאי יודע בדיוק מה לעשות.",
   },
   {
     id: 3,
     label: "ביקור",
     sublabel: "ביקור ביניים ותיעוד",
-    screenshot: "/stuff/Jobs.png",
-    screenshotAlt: "רשימת משימות פרשמור, כרטיסי עבודה",
+    image: "/stuff/Jobs.png",
+    imageAlt: "רשימת משימות פרשמור, כרטיסי עבודה",
+    spotlightX: "50%",
+    spotlightY: "50%",
+    callout: "רשימת המשימות מתעדכנת אוטומטית. אף ביקור לא נשכח.",
   },
   {
     id: 4,
     label: "החזרה",
     sublabel: "נאסף ומוחזר למחסן",
-    screenshot: "/stuff/Map.png",
-    screenshotAlt: "מפת נכסים פרשמור, תכנון איסוף",
+    image: "/stuff/Map.png",
+    imageAlt: "מפת נכסים פרשמור, תכנון איסוף",
+    spotlightX: "40%",
+    spotlightY: "45%",
+    callout: "המפה מראה בדיוק מה צריך לאסוף ואיפה. כל נסיעה שווה את הזמן.",
   },
 ];
 
-function DeviceDot() {
-  return (
-    <div className="relative flex items-center justify-center w-7 h-7">
-      <motion.div
-        className="absolute inset-0 rounded-full bg-brand-cyan/30"
-        animate={{ scale: [1, 1.55, 1] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <div className="relative w-4 h-4 rounded-full bg-brand-cyan shadow-md" />
-    </div>
-  );
-}
+/* ─── spotlight circle radius (px) ────────────────────────────────────────── */
+const RING_PX     = 180; // desktop
+const RING_PX_MOB = 140; // mobile
 
 export default function DeviceJourney() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const inView     = useInView(sectionRef, { once: true, amount: 0.15 });
-  const [activeStep, setActiveStep]               = useState<number | null>(null);
-  const [played, setPlayed]                       = useState(false);
-  const [mobileDisplayStep, setMobileDisplayStep] = useState(0);
 
+  const [activeIdx, setActiveIdx]     = useState(0);
+  const [paused,    setPaused]        = useState(false);
+  const [imageKey,  setImageKey]      = useState(0); // triggers fade-in
+
+  const step = STEPS[activeIdx];
+
+  const goTo = useCallback((i: number) => {
+    setPaused(true);
+    setActiveIdx(i);
+    setImageKey((k) => k + 1);
+  }, []);
+
+  // Auto-advance every 4s
   useEffect(() => {
-    if (activeStep !== null) setMobileDisplayStep(activeStep - 1);
-  }, [activeStep]);
-
-  function playJourney() {
-    setActiveStep(null);
-    setPlayed(false);
-    setMobileDisplayStep(0);
-    setTimeout(() => {
-      setPlayed(true);
-      STEPS.forEach((step, i) => {
-        setTimeout(() => setActiveStep(step.id), i * 950);
-      });
-    }, 80);
-  }
-
-  function goMobileStep(i: number) {
-    setMobileDisplayStep(Math.max(0, Math.min(STEPS.length - 1, i)));
-  }
+    if (paused) return;
+    const id = setTimeout(() => {
+      const next = (activeIdx + 1) % STEPS.length;
+      setActiveIdx(next);
+      setImageKey((k) => k + 1);
+    }, 4000);
+    return () => clearTimeout(id);
+  }, [activeIdx, paused]);
 
   return (
     <section ref={sectionRef} className="bg-brand-surface py-16 lg:py-24 scroll-mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* ── Header ─────────────────────────────────────────────────────── */}
+        {/* ── Header ─────────────────────────────────────────────────── */}
         <motion.div
           className="text-center max-w-3xl mx-auto mb-12"
           initial={{ opacity: 0, y: 24 }}
@@ -92,234 +107,202 @@ export default function DeviceJourney() {
           <p className="text-lg text-slate-600 leading-relaxed">
             פרשמור עוקבת אחרי כל נכס בכל שלב. מהפריסה הראשונה ועד האיסוף הסופי, בלי אובדן ובלי הפתעות.
           </p>
-          {/* Play button — brand-cyan bg, white text */}
-          <button
-            onClick={playJourney}
-            className="mt-6 inline-flex items-center gap-2 bg-brand-cyan hover:bg-brand-cyan-dark text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors shadow-sm"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            {played ? "הצג מחדש" : "הפעל מסע המכשיר"}
-          </button>
         </motion.div>
 
-        {/* ── Desktop: 4 white cards in a row ────────────────────────────── */}
-        <div className="hidden lg:grid lg:grid-cols-4 gap-6 relative z-10">
-          {STEPS.map((step, index) => {
-            const isActive  = activeStep !== null && step.id <= activeStep;
-            const isCurrent = step.id === activeStep;
-
-            return (
-              <motion.div
-                key={step.id}
-                className="bg-white rounded-2xl p-6 flex flex-col items-center text-center"
-                initial={{ opacity: 0, y: 24 }}
-                animate={inView ? {
-                  opacity: 1,
-                  y: 0,
-                  scale: isCurrent ? 1.03 : 1,
-                  borderColor: isCurrent
-                    ? "#16B7E8"
-                    : isActive
-                    ? "rgba(22,183,232,0.35)"
-                    : "#F0F8FF",
-                  boxShadow: isCurrent
-                    ? "0 0 0 2px rgba(22,183,232,0.4), 0 12px 32px rgba(0,0,0,0.10)"
-                    : "0 4px 12px rgba(0,0,0,0.07)",
-                } : { opacity: 0, y: 24 }}
-                transition={{ duration: 0.45, delay: index * 0.08 }}
-                style={{ border: "2px solid #F0F8FF" }}
-              >
-                {/* Step number circle */}
-                <motion.div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold mb-3 relative"
-                  animate={{
-                    backgroundColor: isActive ? "#16B7E8" : "#e2e8f0",
-                    color:           isActive ? "#0D2B4E" : "#94a3b8",
-                  }}
-                  transition={{ duration: 0.4 }}
-                >
-                  {index + 1}
-                  <AnimatePresence>
-                    {isCurrent && (
-                      <motion.div
-                        className="absolute -top-2 -right-2"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                      >
-                        <DeviceDot />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-
-                {/* Step title */}
-                <motion.h3
-                  className="font-bold text-sm mb-4"
-                  animate={{ color: isActive ? "#0D2B4E" : "#64748b" }}
-                  transition={{ duration: 0.4 }}
-                >
-                  {step.label}
-                </motion.h3>
-
-                {/* Phone — 85% of card width, no background behind it */}
-                <motion.div
-                  className="w-[85%]"
-                  animate={{
-                    filter: isCurrent
-                      ? "drop-shadow(0 0 16px rgba(22,183,232,0.45))"
-                      : isActive
-                      ? "drop-shadow(0 4px 12px rgba(0,0,0,0.15))"
-                      : "drop-shadow(0 2px 6px rgba(0,0,0,0.10))",
-                  }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <PhoneFrame
-                    src={step.screenshot}
-                    alt={step.screenshotAlt}
-                    className="w-full"
-                  />
-                </motion.div>
-
-                {/* Description */}
-                <p className="text-xs text-slate-500 mt-4 leading-relaxed">{step.sublabel}</p>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* ── Mobile: single-phone swiper ─────────────────────────────────── */}
+        {/* ══ MOBILE: horizontal tab bar + spotlight below ═══════════════ */}
         <div className="lg:hidden">
-
-          {/* Step pills */}
-          <div className="flex justify-center gap-2 mb-5">
-            {STEPS.map((step, i) => (
+          {/* Tab bar */}
+          <div className="flex overflow-x-auto gap-2 pb-3 mb-5 scrollbar-none justify-center">
+            {STEPS.map((s, i) => (
               <button
-                key={step.id}
-                onClick={() => goMobileStep(i)}
-                aria-label={`שלב ${i + 1}: ${step.label}`}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === mobileDisplayStep
-                    ? "bg-brand-cyan w-8"
-                    : "bg-slate-300 w-4 hover:bg-slate-400"
+                key={s.id}
+                onClick={() => goTo(i)}
+                aria-pressed={i === activeIdx}
+                className={`shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  i === activeIdx
+                    ? "bg-brand-primary text-white shadow-sm"
+                    : "bg-white text-slate-500 border border-slate-200 hover:border-brand-cyan/40"
                 }`}
-              />
+              >
+                {s.label}
+              </button>
             ))}
           </div>
 
-          {/* Card with phone */}
-          <div className="flex justify-center mb-4">
+          {/* Spotlight panel — mobile */}
+          <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ minHeight: "280px" }}>
             <AnimatePresence mode="wait">
               <motion.div
-                key={mobileDisplayStep}
-                className="relative w-full max-w-xs"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                key={imageKey}
+                className="absolute inset-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
               >
-                {activeStep === STEPS[mobileDisplayStep].id && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                    <DeviceDot />
-                  </div>
-                )}
-                {/* White card surface */}
-                <div className="bg-white border-2 border-brand-surface shadow-md rounded-2xl p-4 flex flex-col items-center">
-                  {/* Step number + title row */}
-                  <div className="flex items-center gap-2 mb-3 self-center">
-                    <motion.div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                      animate={{
-                        backgroundColor:
-                          activeStep !== null && STEPS[mobileDisplayStep].id <= activeStep
-                            ? "#16B7E8"
-                            : "#e2e8f0",
-                        color:
-                          activeStep !== null && STEPS[mobileDisplayStep].id <= activeStep
-                            ? "#0D2B4E"
-                            : "#94a3b8",
-                      }}
-                      transition={{ duration: 0.4 }}
-                    >
-                      {mobileDisplayStep + 1}
-                    </motion.div>
-                    <h3 className="font-bold text-brand-primary text-base">
-                      {STEPS[mobileDisplayStep].label}
-                    </h3>
-                  </div>
-                  {/* Phone — 80% of card width, main visual */}
-                  <motion.div
-                    className="w-4/5"
-                    animate={{
-                      filter:
-                        activeStep === STEPS[mobileDisplayStep].id
-                          ? "drop-shadow(0 0 16px rgba(22,183,232,0.45))"
-                          : "none",
-                    }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <PhoneFrame
-                      src={STEPS[mobileDisplayStep].screenshot}
-                      alt={STEPS[mobileDisplayStep].screenshotAlt}
-                      className="w-full"
-                    />
-                  </motion.div>
-                  {/* Description — tight below phone */}
-                  <p className="text-center text-xs text-slate-500 mt-3">
-                    {STEPS[mobileDisplayStep].sublabel}
-                  </p>
+                <Image
+                  src={step.image}
+                  alt={step.imageAlt}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Spotlight circle — box-shadow vignette, mobile size */}
+            <div
+              className="absolute z-10 rounded-full"
+              style={{
+                width:  RING_PX_MOB,
+                height: RING_PX_MOB,
+                left:   `calc(${step.spotlightX} - ${RING_PX_MOB / 2}px)`,
+                top:    `calc(${step.spotlightY} - ${RING_PX_MOB / 2}px)`,
+                boxShadow: "0 0 0 2000px rgba(0,0,0,0.45)",
+                border: "4px solid rgba(255,255,255,0.8)",
+                transition: "left 400ms ease, top 400ms ease",
+              }}
+            />
+
+            {/* Callout */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`callout-mob-${activeIdx}`}
+                className="absolute bottom-0 start-0 end-0 z-20 p-4"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="bg-brand-cyan/10 border-r-4 border-brand-cyan rounded-xl p-3 backdrop-blur-sm">
+                  <p className="text-sm font-medium text-brand-primary leading-snug">{step.callout}</p>
                 </div>
               </motion.div>
             </AnimatePresence>
           </div>
+        </div>
 
-          {/* Label crossfade */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`label-${mobileDisplayStep}`}
-              className="text-center mb-5"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <span className="text-[10px] font-bold text-brand-cyan/70 uppercase tracking-widest">
-                שלב {mobileDisplayStep + 1} מתוך {STEPS.length}
-              </span>
-            </motion.div>
-          </AnimatePresence>
+        {/* ══ DESKTOP: step list (right) + spotlight (left) ═════════════ */}
+        <div className="hidden lg:grid lg:grid-cols-2 gap-10 items-start">
 
-          {/* Prev / Next — 44px touch targets */}
-          <div className="flex justify-center items-center gap-4 mt-4">
-            <button
-              onClick={() => goMobileStep(mobileDisplayStep - 1)}
-              disabled={mobileDisplayStep === 0}
-              aria-label="שלב הקודם"
-              className="w-11 h-11 rounded-xl border-2 border-slate-200 flex items-center justify-center text-slate-500
-                         hover:border-brand-cyan hover:text-brand-primary disabled:opacity-30 transition-colors"
+          {/* Step list — first in DOM = right in RTL */}
+          <motion.div
+            className="flex flex-col gap-2 pt-2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          >
+            {STEPS.map((s, i) => {
+              const isActive = i === activeIdx;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => goTo(i)}
+                  className={`w-full text-right rounded-xl px-4 py-3 transition-all duration-200 ${
+                    isActive
+                      ? "bg-brand-primary text-white shadow-sm"
+                      : "text-slate-500 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`mt-0.5 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-slate-100 text-slate-400"
+                      }`}
+                    >
+                      {i + 1}
+                    </span>
+                    <div>
+                      <div className={`font-bold text-sm ${isActive ? "text-white" : "text-brand-primary"}`}>
+                        {s.label}
+                      </div>
+                      <div className={`text-xs mt-0.5 ${isActive ? "text-blue-200" : "text-slate-400"}`}>
+                        {s.sublabel}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+
+            {/* Progress indicator */}
+            <div className="flex gap-1.5 px-4 pt-3">
+              {STEPS.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    i === activeIdx ? "bg-brand-cyan w-8" : "bg-slate-300 w-4"
+                  }`}
+                />
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Spotlight panel — second in DOM = left in RTL */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+          >
+            <div
+              className="relative bg-white rounded-3xl shadow-xl overflow-hidden"
+              style={{ minHeight: "400px" }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            <span className="text-sm text-slate-500 font-semibold tabular-nums w-12 text-center">
-              {mobileDisplayStep + 1} / {STEPS.length}
-            </span>
-            <button
-              onClick={() => goMobileStep(mobileDisplayStep + 1)}
-              disabled={mobileDisplayStep === STEPS.length - 1}
-              aria-label="שלב הבא"
-              className="w-11 h-11 rounded-xl border-2 border-slate-200 flex items-center justify-center text-slate-500
-                         hover:border-brand-cyan hover:text-brand-primary disabled:opacity-30 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-          </div>
+              {/* Image — fades on step change */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={imageKey}
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Image
+                    src={step.image}
+                    alt={step.imageAlt}
+                    fill
+                    sizes="(max-width: 1280px) 50vw, 640px"
+                    className="object-cover"
+                  />
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Spotlight circle — box-shadow creates the dark vignette outside it */}
+              <div
+                className="absolute z-10 rounded-full"
+                style={{
+                  width:  RING_PX,
+                  height: RING_PX,
+                  left:   `calc(${step.spotlightX} - ${RING_PX / 2}px)`,
+                  top:    `calc(${step.spotlightY} - ${RING_PX / 2}px)`,
+                  boxShadow: "0 0 0 2000px rgba(0,0,0,0.45), 0 0 40px rgba(0,0,0,0.3)",
+                  border: "4px solid rgba(255,255,255,0.8)",
+                  transition: "left 400ms ease, top 400ms ease",
+                }}
+              />
+
+              {/* Callout box */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`callout-${activeIdx}`}
+                  className="absolute bottom-0 start-0 end-0 z-20 p-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="bg-brand-cyan/10 border-r-4 border-brand-cyan rounded-xl p-4 backdrop-blur-sm">
+                    <p className="text-sm font-medium text-brand-primary leading-relaxed">
+                      {step.callout}
+                    </p>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </motion.div>
 
         </div>
 
