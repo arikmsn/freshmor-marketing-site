@@ -40,11 +40,11 @@ export default function TrustSection() {
   const inView = useInView(ref, { once: true, amount: 0.15 });
 
   return (
-    <section className="bg-white py-20 lg:py-28">
+    <section className="bg-white py-14 lg:py-20">
       <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <motion.div
-          className="text-center max-w-2xl mx-auto mb-14"
+          className="text-center max-w-2xl mx-auto mb-10"
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -52,36 +52,6 @@ export default function TrustSection() {
           <h2 className="text-3xl md:text-4xl font-bold text-brand-primary mb-4">
             בנוי על אמון ושקיפות
           </h2>
-          <p className="text-slate-600 text-lg leading-relaxed">
-            חברות מובילות בתחומן כבר מנהלות את הנכסים שלהן עם פרשמור.
-          </p>
-        </motion.div>
-
-        {/* Social proof line */}
-        <motion.p
-          className="text-center text-slate-500 text-base font-medium mb-6"
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.15 }}
-        >
-          מצטרפים לחברות מובילות בתחומן
-        </motion.p>
-
-        {/* Company name pills */}
-        <motion.div
-          className="flex flex-wrap justify-center gap-3 mb-14"
-          initial={{ opacity: 0, y: 12 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55, delay: 0.28 }}
-        >
-          {["פרוטוס", "נובה", "אויר נקי", "מכמורת", "מדיקל הום"].map((name) => (
-            <span
-              key={name}
-              className="bg-white border border-gray-200 rounded-full px-6 py-3 text-brand-primary font-medium text-sm shadow-sm"
-            >
-              {name}
-            </span>
-          ))}
         </motion.div>
 
         {/* Principles */}
@@ -92,7 +62,7 @@ export default function TrustSection() {
               className="flex gap-4 items-start"
               initial={{ opacity: 0, y: 24 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.25 + i * 0.1 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.15 + i * 0.1 }}
             >
               <div className="shrink-0 w-14 h-14 rounded-2xl bg-brand-cyan/10 text-brand-cyan flex items-center justify-center">
                 {p.icon}

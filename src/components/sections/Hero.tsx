@@ -16,6 +16,7 @@ const BULLETS = [
 /* ─── diagram data ─────────────────────────────────────────────────────────── */
 // viewBox "0 0 440 230" — node centers at:
 //   מחסן  (55,130)  פריסה (165,70)  ביקור (275,70)  איסוף (385,130)
+// Node radius: 40px (w-20 = 80px)
 const NODES = [
   { id: 0, label: "מחסן",  Icon: Package,       cx: 55,  cy: 130 },
   { id: 1, label: "פריסה", Icon: MapPin,         cx: 165, cy: 70  },
@@ -26,11 +27,12 @@ const NODES = [
 const VB_W = 440;
 const VB_H = 230;
 
-// Edge-to-edge curved dashed arrows (circle radius ≈ 28px)
+// Edge-to-edge curved dashed arrows (node radius 40px)
+// Arrow endpoints calculated from circle edges toward each other
 const ARROWS = [
-  "M 80 117 C 95 100 125 88 140 83",  // מחסן → פריסה
-  "M 193 70 C 210 50 230 50 247 70",  // פריסה → ביקור
-  "M 300 83 C 315 88 345 100 360 117",// ביקור → איסוף
+  "M 90 111 C 103 100 118 92 130 89",    // מחסן → פריסה
+  "M 205 70 C 215 50 225 50 235 70",     // פריסה → ביקור
+  "M 310 89 C 322 92 337 101 350 111",   // ביקור → איסוף
 ];
 
 const STATUS_BADGES = [
@@ -50,7 +52,17 @@ function ProcessDiagram({
   badgeVisible: boolean;
 }) {
   return (
-    <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl p-6">
+    <div
+      className="relative rounded-3xl p-6 overflow-hidden"
+      style={{
+        // Layered background: dot grid over gradient
+        background: [
+          "radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)",
+          "linear-gradient(135deg, rgba(13,43,78,0.85) 0%, rgba(6,23,43,0.92) 100%)",
+        ].join(", "),
+        backgroundSize: "24px 24px, 100% 100%",
+      }}
+    >
       {/* padding-top aspect-ratio trick: 230/440 ≈ 52.3% */}
       <div className="relative w-full" style={{ paddingTop: "52.3%" }}>
         {/* SVG — arrows only */}
@@ -64,14 +76,14 @@ function ProcessDiagram({
           <style>{`
             @keyframes dashFlow {
               from { stroke-dashoffset: 20; }
-              to   { stroke-dashoffset: 0; }
+              to   { stroke-dashoffset: 0;  }
             }
           `}</style>
           {ARROWS.map((d, i) => (
             <path
               key={i}
               d={d}
-              stroke="rgba(22,183,232,0.55)"
+              stroke="rgba(22,183,232,0.6)"
               strokeWidth="2"
               strokeLinecap="round"
               strokeDasharray="6 4"
@@ -83,7 +95,7 @@ function ProcessDiagram({
           ))}
         </svg>
 
-        {/* Nodes — absolutely positioned over SVG using viewBox % */}
+        {/* Nodes — absolutely positioned over SVG */}
         {NODES.map((node, i) => {
           const leftPct = (node.cx / VB_W) * 100;
           const topPct  = (node.cy / VB_H) * 100;
@@ -92,13 +104,13 @@ function ProcessDiagram({
           return (
             <motion.div
               key={node.id}
-              className="absolute flex flex-col items-center gap-1.5"
+              className="absolute flex flex-col items-center gap-2"
               style={{
                 left: `${leftPct}%`,
-                top: `${topPct}%`,
+                top:  `${topPct}%`,
                 transform: "translate(-50%, -50%)",
               }}
-              animate={{ scale: [1, 1.05, 1] }}
+              animate={{ scale: isActive ? [1, 1.1, 1] : [1, 1.04, 1] }}
               transition={{
                 duration: 3,
                 repeat: Infinity,
@@ -107,28 +119,28 @@ function ProcessDiagram({
               }}
             >
               <div
-                className="transition-all duration-300 w-14 h-14 rounded-full flex items-center justify-center"
+                className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg"
                 style={{
+                  transition: "all 0.35s ease",
                   background: isActive
-                    ? "rgba(22,183,232,0.18)"
-                    : "rgba(255,255,255,0.08)",
-                  backdropFilter: "blur(6px)",
+                    ? "rgba(255,255,255,0.25)"
+                    : "rgba(255,255,255,0.10)",
                   border: isActive
-                    ? "2px solid #16B7E8"
-                    : "1px solid rgba(22,183,232,0.35)",
+                    ? "2px solid rgba(22,183,232,0.9)"
+                    : "2px solid rgba(22,183,232,0.50)",
                   boxShadow: isActive
-                    ? "0 0 0 3px rgba(22,183,232,0.35), 0 8px 24px rgba(22,183,232,0.25)"
-                    : "none",
+                    ? "0 0 0 6px rgba(22,183,232,0.22), 0 12px 32px rgba(22,183,232,0.30)"
+                    : "0 4px 16px rgba(0,0,0,0.25)",
                 }}
               >
                 <node.Icon
-                  className="w-6 h-6"
+                  className="w-8 h-8"
                   strokeWidth={1.8}
                   aria-hidden
                   style={{ color: "#16B7E8" }}
                 />
               </div>
-              <span className="text-white/80 text-xs font-medium whitespace-nowrap">
+              <span className="text-white/85 text-xs font-medium whitespace-nowrap">
                 {node.label}
               </span>
             </motion.div>
@@ -136,10 +148,10 @@ function ProcessDiagram({
         })}
       </div>
 
-      {/* Status badge — bottom-right of card */}
-      <div className="flex justify-end mt-3 min-h-[30px] items-end">
+      {/* Status badge — absolute bottom-start of card */}
+      <div className="absolute bottom-4 start-4">
         <div
-          className="bg-brand-cyan text-white text-xs font-medium rounded-xl px-3 py-1.5 shadow-md"
+          className="flex items-center gap-2 bg-brand-cyan text-white text-sm font-medium rounded-xl px-4 py-2 shadow-md"
           style={{
             transition: "opacity 0.3s ease, transform 0.3s ease",
             opacity: badgeVisible ? 1 : 0,
@@ -148,6 +160,7 @@ function ProcessDiagram({
           aria-live="polite"
           aria-atomic="true"
         >
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse shrink-0" aria-hidden="true" />
           {STATUS_BADGES[badgeIdx]}
         </div>
       </div>

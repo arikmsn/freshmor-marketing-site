@@ -52,29 +52,34 @@ export default function HowItWorks() {
           {STEPS.map((step, i) => (
             <motion.div
               key={step.number}
-              className="relative bg-white rounded-2xl shadow-sm p-5 overflow-hidden"
+              className="relative bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden transition-shadow hover:shadow-lg"
               initial={{ opacity: 0, y: 28 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.1 + i * 0.1 }}
               whileHover={{
                 y: -3,
-                boxShadow: "0 10px 28px rgba(13,43,78,0.10)",
                 transition: { duration: 0.2 },
               }}
             >
-              {/* Watermark step number */}
-              <span
-                className="absolute top-3 end-4 font-bold text-brand-cyan select-none pointer-events-none"
-                style={{ fontSize: "4rem", lineHeight: 1, opacity: 0.15 }}
-                aria-hidden="true"
-              >
-                {step.number}
-              </span>
+              {/* Top gradient stripe */}
+              <div className="h-1 w-full bg-gradient-to-r from-brand-cyan to-brand-primary" aria-hidden="true" />
 
-              {/* Content */}
-              <div className="relative z-10">
-                <h3 className="text-base font-bold text-brand-primary mb-2">{step.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{step.text}</p>
+              {/* Card body */}
+              <div className="relative p-5">
+                {/* Watermark step number */}
+                <span
+                  className="absolute top-2 end-3 font-bold text-brand-cyan select-none pointer-events-none text-8xl leading-none"
+                  style={{ opacity: 0.10 }}
+                  aria-hidden="true"
+                >
+                  {step.number}
+                </span>
+
+                {/* Content */}
+                <div className="relative z-10">
+                  <h3 className="text-lg font-bold text-brand-primary mb-2">{step.title}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">{step.text}</p>
+                </div>
               </div>
             </motion.div>
           ))}

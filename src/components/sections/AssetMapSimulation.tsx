@@ -300,25 +300,27 @@ export default function AssetMapSimulation() {
                   })}
 
                   {/* ── Floating play/pause inside map — bottom-left corner ───── */}
-                  <div className="absolute bottom-4 left-4 z-20 group flex items-center gap-2">
-                    <button
-                      onClick={togglePlay}
-                      aria-label={isPlaying ? "עצור סיור אוטומטי" : "הפעל סיור אוטומטי במפה"}
-                      aria-pressed={isPlaying}
-                      className="w-12 h-12 rounded-full bg-brand-cyan text-white shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus:outline-none ring-2 ring-white ring-offset-2 ring-offset-transparent"
-                    >
-                      {isPlaying ? <PauseIcon /> : <PlayIcon />}
-                    </button>
-                    {/* Desktop label — visible to the right of the button (RTL: left side) */}
-                    <span className="hidden sm:block text-xs font-medium text-gray-500 bg-white/80 px-2 py-1 rounded-md whitespace-nowrap shadow-sm">
-                      {isPlaying ? "עצור" : "הפעל סיור"}
-                    </span>
-                    {/* Mobile tooltip on hover */}
-                    <span
-                      role="tooltip"
-                      className="sm:hidden absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-brand-primary text-white text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                    >
-                      {isPlaying ? "עצור" : "הפעל סיור אוטומטי"}
+                  <div className="absolute bottom-4 left-4 z-20 flex flex-col items-center gap-1">
+                    <div className="relative">
+                      {/* Pulsing ring when playing */}
+                      {isPlaying && (
+                        <span
+                          className="absolute inset-0 rounded-full animate-ping"
+                          style={{ background: "rgba(22,183,232,0.35)" }}
+                          aria-hidden="true"
+                        />
+                      )}
+                      <button
+                        onClick={togglePlay}
+                        aria-label={isPlaying ? "עצור סיור אוטומטי" : "הפעל סיור אוטומטי במפה"}
+                        aria-pressed={isPlaying}
+                        className="relative w-12 h-12 rounded-full bg-brand-cyan text-white shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus:outline-none ring-2 ring-white ring-offset-2 ring-offset-transparent"
+                      >
+                        {isPlaying ? <PauseIcon /> : <PlayIcon />}
+                      </button>
+                    </div>
+                    <span className="text-xs text-gray-400 font-medium whitespace-nowrap">
+                      סיור אוטומטי
                     </span>
                   </div>
 
