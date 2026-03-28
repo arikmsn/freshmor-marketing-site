@@ -227,11 +227,11 @@ export default function DeviceJourney() {
                   </div>
                 )}
                 {/* White card surface */}
-                <div className="bg-white border-2 border-brand-surface shadow-md rounded-2xl p-6">
-                  {/* Step number */}
-                  <div className="flex justify-center mb-3">
+                <div className="bg-white border-2 border-brand-surface shadow-md rounded-2xl p-4 flex flex-col items-center">
+                  {/* Step number + title row */}
+                  <div className="flex items-center gap-2 mb-3 self-center">
                     <motion.div
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
                       animate={{
                         backgroundColor:
                           activeStep !== null && STEPS[mobileDisplayStep].id <= activeStep
@@ -246,13 +246,13 @@ export default function DeviceJourney() {
                     >
                       {mobileDisplayStep + 1}
                     </motion.div>
+                    <h3 className="font-bold text-brand-primary text-base">
+                      {STEPS[mobileDisplayStep].label}
+                    </h3>
                   </div>
-                  {/* Step title */}
-                  <h3 className="text-center font-bold text-brand-primary text-base mb-4">
-                    {STEPS[mobileDisplayStep].label}
-                  </h3>
-                  {/* Phone — fills card width */}
+                  {/* Phone — 80% of card width, main visual */}
                   <motion.div
+                    className="w-4/5"
                     animate={{
                       filter:
                         activeStep === STEPS[mobileDisplayStep].id
@@ -267,8 +267,8 @@ export default function DeviceJourney() {
                       className="w-full"
                     />
                   </motion.div>
-                  {/* Description */}
-                  <p className="text-center text-xs text-slate-500 mt-4">
+                  {/* Description — tight below phone */}
+                  <p className="text-center text-xs text-slate-500 mt-3">
                     {STEPS[mobileDisplayStep].sublabel}
                   </p>
                 </div>
@@ -293,7 +293,7 @@ export default function DeviceJourney() {
           </AnimatePresence>
 
           {/* Prev / Next — 44px touch targets */}
-          <div className="flex justify-center items-center gap-4">
+          <div className="flex justify-center items-center gap-4 mt-4">
             <button
               onClick={() => goMobileStep(mobileDisplayStep - 1)}
               disabled={mobileDisplayStep === 0}

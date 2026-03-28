@@ -31,7 +31,7 @@ export default function Hero() {
   const inView = useInView(ref, { once: true, amount: 0.1 });
 
   return (
-    <section className="bg-brand-dark text-white py-20 lg:py-28 overflow-hidden">
+    <section className="bg-brand-dark text-white pt-20 pb-8 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={ref} className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
 
@@ -50,9 +50,9 @@ export default function Hero() {
               הדור הבא של ניהול מערכי שטח, עם שקיפות מלאה מפריסה ועד החזרה, ניטור חכם של נכסים וחיסכון מוכח בעלויות התפעול.
             </p>
 
-            {/* ── Mobile phone — centered, 72% width, no box around it ──────── */}
-            <div className="lg:hidden flex justify-center">
-              <div className="w-3/4 max-w-[260px]">
+            {/* ── Mobile phone — centered, full auto height, no crop ─────── */}
+            <div className="lg:hidden flex justify-center pb-2">
+              <div className="w-3/4 max-w-[220px]">
                 <PhoneFrame
                   src="/stuff/Main.png"
                   alt="מסך הבית של פרשמור, ניהול נכסי שטח"

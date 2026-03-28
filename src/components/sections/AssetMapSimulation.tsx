@@ -300,19 +300,23 @@ export default function AssetMapSimulation() {
                   })}
 
                   {/* ── Floating play/pause inside map — bottom-left corner ───── */}
-                  <div className="absolute bottom-4 left-4 z-20 group">
+                  <div className="absolute bottom-4 left-4 z-20 group flex items-center gap-2">
                     <button
                       onClick={togglePlay}
                       aria-label={isPlaying ? "עצור סיור אוטומטי" : "הפעל סיור אוטומטי במפה"}
                       aria-pressed={isPlaying}
-                      className="w-10 h-10 rounded-full bg-brand-cyan text-white shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+                      className="w-12 h-12 rounded-full bg-brand-cyan text-white shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus:outline-none ring-2 ring-white ring-offset-2 ring-offset-transparent"
                     >
                       {isPlaying ? <PauseIcon /> : <PlayIcon />}
                     </button>
-                    {/* Hover tooltip */}
+                    {/* Desktop label — visible to the right of the button (RTL: left side) */}
+                    <span className="hidden sm:block text-xs font-medium text-gray-500 bg-white/80 px-2 py-1 rounded-md whitespace-nowrap shadow-sm">
+                      {isPlaying ? "עצור" : "הפעל סיור"}
+                    </span>
+                    {/* Mobile tooltip on hover */}
                     <span
                       role="tooltip"
-                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-brand-primary text-white text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                      className="sm:hidden absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-brand-primary text-white text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
                     >
                       {isPlaying ? "עצור" : "הפעל סיור אוטומטי"}
                     </span>
