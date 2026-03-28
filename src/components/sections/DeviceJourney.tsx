@@ -14,6 +14,8 @@ interface Step {
   imageAlt: string;
   spotlightX: string;
   spotlightY: string;
+  ringPx: number;
+  overlayOpacity: number;
   callout: string;
 }
 
@@ -25,7 +27,9 @@ const STEPS: Step[] = [
     image: "/stuff/Main.png",
     imageAlt: "מסך הבית של פרשמור, מלאי ונכסים",
     spotlightX: "50%",
-    spotlightY: "35%",
+    spotlightY: "28%",
+    ringPx: 160,
+    overlayOpacity: 0.48,
     callout: "כל הנכסים ממתינים מסודרים. פרשמור יודעת מה יוצא, מתי ולאן.",
   },
   {
@@ -34,8 +38,10 @@ const STEPS: Step[] = [
     sublabel: "מותקן אצל הלקוח",
     image: "/stuff/WorkOrder.png",
     imageAlt: "כרטיס עבודה פרשמור, פרטי פריסה",
-    spotlightX: "50%",
-    spotlightY: "40%",
+    spotlightX: "25%",
+    spotlightY: "45%",
+    ringPx: 160,
+    overlayOpacity: 0.48,
     callout: "כרטיס עבודה מפורט לכל פריסה. הטכנאי יודע בדיוק מה לעשות.",
   },
   {
@@ -45,7 +51,9 @@ const STEPS: Step[] = [
     image: "/stuff/Jobs.png",
     imageAlt: "רשימת משימות פרשמור, כרטיסי עבודה",
     spotlightX: "50%",
-    spotlightY: "45%",
+    spotlightY: "38%",
+    ringPx: 150,
+    overlayOpacity: 0.48,
     callout: "רשימת המשימות מתעדכנת אוטומטית. אף ביקור לא נשכח.",
   },
   {
@@ -54,16 +62,16 @@ const STEPS: Step[] = [
     sublabel: "נאסף ומוחזר למחסן",
     image: "/stuff/Map.png",
     imageAlt: "מפת נכסים פרשמור, תכנון איסוף",
-    spotlightX: "45%",
-    spotlightY: "40%",
+    spotlightX: "55%",
+    spotlightY: "42%",
+    ringPx: 200,
+    overlayOpacity: 0.25,
     callout: "המפה מראה בדיוק מה צריך לאסוף ואיפה. כל נסיעה שווה את הזמן.",
   },
 ];
 
 /* ─── spotlight sizes ──────────────────────────────────────────────────────── */
-const RING_PX     = 200; // inner spotlight circle — desktop
-const OUTER_PX    = 220; // outer decorative ring — desktop
-const RING_PX_MOB = 140; // mobile
+const RING_PX_MOB  = 140; // mobile — fixed size
 const OUTER_PX_MOB = 158; // mobile outer ring
 
 export default function DeviceJourney() {
@@ -95,8 +103,17 @@ export default function DeviceJourney() {
   }, [activeIdx, paused]);
 
   /* ─── spotlight panel (shared between mobile + desktop) ─────────────────── */
-  function SpotlightPanel({ ringPx, outerPx, minH }: { ringPx: number; outerPx: number; minH: string }) {
-    const halfRing  = ringPx  / 2;
+  function SpotlightPanel({
+    ringPx,
+    overlayOpacity,
+    minH,
+  }: {
+    ringPx: number;
+    overlayOpacity: number;
+    minH: string;
+  }) {
+    const radius   = ringPx / 2;
+    const outerPx  = ringPx + 20;
     const halfOuter = outerPx / 2;
 
     return (
@@ -121,13 +138,22 @@ export default function DeviceJourney() {
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
+              priority={activeIdx === 0}
             />
           </motion.div>
         </AnimatePresence>
 
+        {/* Radial-gradient overlay — hole at spotlight position */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none"
+          style={{
+            background: `radial-gradient(circle ${radius}px at ${step.spotlightX} ${step.spotlightY}, transparent ${radius}px, rgba(0,0,0,${overlayOpacity}) calc(${radius}px + 2px))`,
+          }}
+        />
+
         {/* Outer decorative ring */}
         <div
-          className="absolute z-10 rounded-full pointer-events-none"
+          className="absolute z-20 rounded-full pointer-events-none"
           style={{
             width:  outerPx,
             height: outerPx,
@@ -138,31 +164,30 @@ export default function DeviceJourney() {
           }}
         />
 
-        {/* Spotlight circle — box-shadow vignette + white ring */}
+        {/* White spotlight ring */}
         <div
-          className="absolute z-10 rounded-full pointer-events-none"
+          className="absolute z-20 rounded-full pointer-events-none shadow-2xl"
           style={{
             width:  ringPx,
             height: ringPx,
-            left:   `calc(${step.spotlightX} - ${halfRing}px)`,
-            top:    `calc(${step.spotlightY} - ${halfRing}px)`,
-            boxShadow: "0 0 0 2000px rgba(0,0,0,0.48), 0 0 40px rgba(0,0,0,0.25)",
-            border: "4px solid rgba(255,255,255,0.82)",
+            left:   `calc(${step.spotlightX} - ${radius}px)`,
+            top:    `calc(${step.spotlightY} - ${radius}px)`,
+            border: "4px solid white",
             transition: "left 400ms ease, top 400ms ease",
           }}
         />
 
-        {/* Step name label — bottom of spotlight circle */}
+        {/* Step name label — bottom interior of spotlight circle */}
         <div
-          className="absolute z-20 pointer-events-none"
+          className="absolute z-30 pointer-events-none"
           style={{
             left:      step.spotlightX,
-            top:       `calc(${step.spotlightY} + ${halfRing - 22}px)`,
+            top:       `calc(${step.spotlightY} + ${radius - 24}px)`,
             transform: "translateX(-50%)",
             transition: "left 400ms ease, top 400ms ease",
           }}
         >
-          <span className="bg-black/55 text-white text-xs font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap">
+          <span className="bg-black/60 text-white text-xs font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap">
             {step.label}
           </span>
         </div>
@@ -171,7 +196,7 @@ export default function DeviceJourney() {
         <AnimatePresence mode="wait">
           <motion.div
             key={`callout-${activeIdx}`}
-            className="absolute bottom-0 start-0 end-0 z-20 p-4"
+            className="absolute bottom-0 start-0 end-0 z-30 p-4"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
@@ -224,7 +249,7 @@ export default function DeviceJourney() {
               </button>
             ))}
           </div>
-          <SpotlightPanel ringPx={RING_PX_MOB} outerPx={OUTER_PX_MOB} minH="280px" />
+          <SpotlightPanel ringPx={RING_PX_MOB} overlayOpacity={0.48} minH="280px" />
         </div>
 
         {/* ══ DESKTOP: step list (right) + spotlight (left) ═════════════ */}
@@ -298,7 +323,7 @@ export default function DeviceJourney() {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           >
-            <SpotlightPanel ringPx={RING_PX} outerPx={OUTER_PX} minH="420px" />
+            <SpotlightPanel ringPx={step.ringPx} overlayOpacity={step.overlayOpacity} minH="420px" />
           </motion.div>
 
         </div>

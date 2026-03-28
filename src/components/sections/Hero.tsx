@@ -14,26 +14,19 @@ const BULLETS = [
 ];
 
 /* ─── diagram data ─────────────────────────────────────────────────────────── */
-// viewBox "0 0 440 230" — node centers at:
-//   מחסן  (55,130)  פריסה (165,70)  ביקור (275,70)  איסוף (385,130)
-// Node radius: 40px (w-20 = 80px)
+// 2×2 RTL grid: מחסן (top-right) | פריסה (top-left)
+//               איסוף (bottom-right) | ביקור (bottom-left)
 const NODES = [
-  { id: 0, label: "מחסן",  Icon: Package,       cx: 55,  cy: 130 },
-  { id: 1, label: "פריסה", Icon: MapPin,         cx: 165, cy: 70  },
-  { id: 2, label: "ביקור", Icon: CalendarCheck,  cx: 275, cy: 70  },
-  { id: 3, label: "איסוף", Icon: PackageCheck,   cx: 385, cy: 130 },
+  { id: 0, label: "מחסן",  Icon: Package       },
+  { id: 1, label: "פריסה", Icon: MapPin         },
+  { id: 2, label: "ביקור", Icon: CalendarCheck  },
+  { id: 3, label: "איסוף", Icon: PackageCheck   },
 ] as const;
 
-const VB_W = 440;
-const VB_H = 230;
-
-// Edge-to-edge curved dashed arrows (node radius 40px)
-// Arrow endpoints calculated from circle edges toward each other
-const ARROWS = [
-  "M 90 111 C 103 100 118 92 130 89",    // מחסן → פריסה
-  "M 205 70 C 215 50 225 50 235 70",     // פריסה → ביקור
-  "M 310 89 C 322 92 337 101 350 111",   // ביקור → איסוף
-];
+// Grid display order: [מחסן, פריסה, איסוף, ביקור]
+// In RTL grid: cell 0 = top-right, cell 1 = top-left,
+//              cell 2 = bottom-right, cell 3 = bottom-left
+const GRID_ORDER = [0, 1, 3, 2] as const;
 
 const STATUS_BADGES = [
   "3 נכסים דחופים לאיסוף",
@@ -53,7 +46,7 @@ function ProcessDiagram({
 }) {
   return (
     <div
-      className="relative rounded-3xl p-6 overflow-hidden"
+      className="relative rounded-3xl p-6 lg:p-10 overflow-hidden"
       style={{
         // Layered background: dot grid over gradient
         background: [
@@ -63,58 +56,21 @@ function ProcessDiagram({
         backgroundSize: "24px 24px, 100% 100%",
       }}
     >
-      {/* padding-top aspect-ratio trick: 230/440 ≈ 52.3% */}
-      <div className="relative w-full" style={{ paddingTop: "52.3%" }}>
-        {/* SVG — arrows only */}
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          viewBox={`0 0 ${VB_W} ${VB_H}`}
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <style>{`
-            @keyframes dashFlow {
-              from { stroke-dashoffset: 20; }
-              to   { stroke-dashoffset: 0;  }
-            }
-          `}</style>
-          {ARROWS.map((d, i) => (
-            <path
-              key={i}
-              d={d}
-              stroke="rgba(22,183,232,0.6)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeDasharray="6 4"
-              style={{
-                animation: "dashFlow 2s linear infinite",
-                animationDelay: `${i * 0.4}s`,
-              }}
-            />
-          ))}
-        </svg>
-
-        {/* Nodes — absolutely positioned over SVG */}
-        {NODES.map((node, i) => {
-          const leftPct = (node.cx / VB_W) * 100;
-          const topPct  = (node.cy / VB_H) * 100;
-          const isActive = activeNode === i;
+      {/* 2×2 node grid — no connectors, clean layout */}
+      <div className="grid grid-cols-2 gap-6 sm:gap-8 pb-14">
+        {GRID_ORDER.map((nodeIdx) => {
+          const node     = NODES[nodeIdx];
+          const isActive = activeNode === nodeIdx;
 
           return (
             <motion.div
               key={node.id}
-              className="absolute flex flex-col items-center gap-2"
-              style={{
-                left: `${leftPct}%`,
-                top:  `${topPct}%`,
-                transform: "translate(-50%, -50%)",
-              }}
+              className="flex flex-col items-center gap-2"
               animate={{ scale: isActive ? [1, 1.1, 1] : [1, 1.04, 1] }}
               transition={{
                 duration: 3,
                 repeat: Infinity,
-                delay: i * 0.65,
+                delay: nodeIdx * 0.65,
                 ease: "easeInOut",
               }}
             >
