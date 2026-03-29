@@ -72,6 +72,9 @@ export default function DeviceJourney() {
     return () => clearInterval(id);
   }, []);
 
+  // Debug: verify dynamic step data is being read correctly
+  console.log('active step', activeStep, steps[activeStep].spotlightX);
+
   return (
     <section ref={sectionRef} className="bg-brand-surface py-16 lg:py-24 scroll-mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
