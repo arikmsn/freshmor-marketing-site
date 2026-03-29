@@ -150,7 +150,7 @@ export default function DeviceJourney() {
         </div>
 
         {/* ══ DESKTOP: step list (right) + spotlight (left) ══════════════ */}
-        <div className="hidden lg:grid lg:grid-cols-2 gap-10 items-start">
+        <div className="hidden lg:grid lg:grid-cols-[1fr_minmax(280px,_340px)] gap-6 items-start">
 
           {/* Step list — first in DOM = right in RTL */}
           <motion.div
@@ -166,15 +166,15 @@ export default function DeviceJourney() {
                   key={step.label}
                   onClick={() => handleClick(i)}
                   aria-pressed={isActive}
-                  className={`w-full text-right rounded-xl px-4 py-3 transition-all duration-200 cursor-pointer group ${
+                  className={`w-full text-right rounded-xl px-6 py-5 transition-all duration-200 cursor-pointer group ${
                     isActive
-                      ? "bg-brand-primary/5 border-r-4 border-brand-cyan"
-                      : "hover:bg-gray-50 border-r-4 border-transparent"
+                      ? "bg-brand-primary/8 border-l-4 border-brand-cyan"
+                      : "hover:bg-gray-50 border-l-4 border-transparent"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <span
-                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold shrink-0 transition-colors ${
                         isActive
                           ? "bg-brand-cyan text-white"
                           : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
@@ -183,15 +183,15 @@ export default function DeviceJourney() {
                       {i + 1}
                     </span>
                     <div className="flex-1">
-                      <div className={`font-bold text-sm ${isActive ? "text-brand-primary" : "text-slate-600"}`}>
+                      <div className={`font-bold text-xl ${isActive ? "text-brand-primary" : "text-slate-600"}`}>
                         {step.label}
                       </div>
-                      <div className={`text-xs mt-0.5 ${isActive ? "text-brand-mid" : "text-slate-400"}`}>
+                      <div className={`text-base mt-1 ${isActive ? "text-brand-mid" : "text-slate-400"}`}>
                         {step.description}
                       </div>
                     </div>
                     <ChevronLeft
-                      className={`w-4 h-4 shrink-0 transition-colors ${
+                      className={`w-5 h-5 shrink-0 transition-colors ${
                         isActive ? "text-brand-cyan" : "text-slate-300 group-hover:text-slate-400"
                       }`}
                       strokeWidth={2}
@@ -203,7 +203,7 @@ export default function DeviceJourney() {
             })}
 
             {/* Progress dots */}
-            <div className="flex gap-1.5 px-4 pt-4">
+            <div className="flex gap-1.5 px-6 pt-4">
               {steps.map((_, i) => (
                 <div
                   key={i}
@@ -259,8 +259,8 @@ export default function DeviceJourney() {
               }} />
             </div>
 
-            <div style={{ marginTop: '16px', padding: '16px', backgroundColor: 'rgba(22,183,232,0.08)', borderRight: '4px solid #16B7E8', borderRadius: '12px', textAlign: 'right' }}>
-              <p style={{ color: '#0D2B4E', fontWeight: 500, fontSize: '14px', margin: 0 }}>
+            <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'rgba(22,183,232,0.08)', borderRight: '4px solid #16B7E8', borderRadius: '12px', textAlign: 'right' }}>
+              <p style={{ color: '#0D2B4E', fontWeight: 500, fontSize: '16px', margin: 0 }}>
                 {steps[activeStep].callout}
               </p>
             </div>
