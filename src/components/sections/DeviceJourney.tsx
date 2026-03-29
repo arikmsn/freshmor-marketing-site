@@ -10,7 +10,7 @@ const steps = [
     label: "מחסן",
     description: "הציוד ממתין לפריסה",
     image: "/stuff/Main.png",
-    cx: 38, cy: 52, cr: 70,
+    cx: 38, cy: 62, cr: 70,
     opacity: 0.6,
     callout: "כל הנכסים ממתינים מסודרים. פרשמור יודעת מה יוצא, מתי ולאן.",
   },
@@ -18,7 +18,7 @@ const steps = [
     label: "פריסה",
     description: "מותקן אצל הלקוח",
     image: "/stuff/WorkOrder.png",
-    cx: 85, cy: 20, cr: 65,
+    cx: 85, cy: 25, cr: 65,
     opacity: 0.6,
     callout: "כרטיס עבודה מפורט לכל פריסה. הטכנאי יודע בדיוק מה לעשות.",
   },
@@ -26,7 +26,7 @@ const steps = [
     label: "ביקור",
     description: "ביקור ביניים ותיעוד",
     image: "/stuff/Jobs.png",
-    cx: 28, cy: 38, cr: 65,
+    cx: 38, cy: 68, cr: 65,
     opacity: 0.6,
     callout: "יומן העבודה מתעדכן אוטומטית. אף ביקור לא נשכח.",
   },
@@ -34,8 +34,9 @@ const steps = [
     label: "החזרה",
     description: "נאסף ומוחזר למחסן",
     image: "/stuff/Map.png",
-    cx: 55, cy: 62, cr: 100,
+    cx: 55, cy: 58, cr: 100,
     opacity: 0.25,
+    objectPosition: 'center' as const,
     callout: "המפה מראה בדיוק מה צריך לאסוף ואיפה. כל נסיעה שווה את הזמן.",
   },
 ];
@@ -116,7 +117,7 @@ export default function DeviceJourney() {
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                objectPosition: 'top',
+                objectPosition: steps[activeStep].objectPosition ?? 'top',
               }}
             />
             <div style={{
@@ -233,7 +234,7 @@ export default function DeviceJourney() {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  objectPosition: 'top',
+                  objectPosition: steps[activeStep].objectPosition ?? 'top',
                 }}
               />
               <div style={{
