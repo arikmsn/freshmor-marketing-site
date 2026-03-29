@@ -5,19 +5,20 @@ import { useRef, useState, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 
 /* ─── types ─────────────────────────────────────────────────────────────────── */
-type StepBase = {
+interface Step {
   label: string;
   description: string;
   image: string;
+  /** SVG percentage: cx of spotlight circle, relative to container width */
   cx: string;
+  /** SVG percentage: cy of spotlight circle, relative to container height */
   cy: string;
+  /** SVG percentage: radius, relative to normalized diagonal √((w²+h²)/2) */
+  r: string;
   opacity: number;
-  objectPosition?: 'center';
+  objectPosition?: "center";
   callout: string;
-};
-type Step =
-  | (StepBase & { shape: 'circle';  r: string })
-  | (StepBase & { shape: 'ellipse'; rx: string; ry: string });
+}
 
 /* ─── step data ────────────────────────────────────────────────────────────── */
 const steps: Step[] = [
@@ -25,7 +26,7 @@ const steps: Step[] = [
     label: "מחסן",
     description: "הציוד ממתין לפריסה",
     image: "/stuff/Main.png",
-    shape: 'circle', cx: '47%', cy: '35%', r: '22%',
+    cx: "47%", cy: "35%", r: "20%",
     opacity: 0.6,
     callout: "כל הנכסים ממתינים מסודרים. פרשמור יודעת מה יוצא, מתי ולאן.",
   },
@@ -33,7 +34,7 @@ const steps: Step[] = [
     label: "פריסה",
     description: "מותקן אצל הלקוח",
     image: "/stuff/WorkOrder.png",
-    shape: 'ellipse', cx: '60%', cy: '52%', rx: '45%', ry: '8%',
+    cx: "60%", cy: "52%", r: "20%",
     opacity: 0.6,
     callout: "כרטיס עבודה מפורט לכל פריסה. הטכנאי יודע בדיוק מה לעשות.",
   },
@@ -41,7 +42,7 @@ const steps: Step[] = [
     label: "ביקור",
     description: "ביקור ביניים ותיעוד",
     image: "/stuff/Jobs.png",
-    shape: 'circle', cx: '45%', cy: '30%', r: '22%',
+    cx: "45%", cy: "30%", r: "20%",
     opacity: 0.6,
     callout: "יומן העבודה מתעדכן אוטומטית. אף ביקור לא נשכח.",
   },
@@ -49,57 +50,55 @@ const steps: Step[] = [
     label: "החזרה",
     description: "נאסף ומוחזר למחסן",
     image: "/stuff/Map.png",
-    shape: 'circle', cx: '50%', cy: '55%', r: '25%',
+    cx: "50%", cy: "55%", r: "20%",
     opacity: 0.25,
-    objectPosition: 'center',
+    objectPosition: "center",
     callout: "המפה מראה בדיוק מה צריך לאסוף ואיפה. כל נסיעה שווה את הזמן.",
   },
 ];
 
-/* ─── SpotlightSVG — circle or ellipse cutout via SVG mask ──────────────────── */
+/* ─── SpotlightSVG ─────────────────────────────────────────────────────────── */
+// Dark overlay with a circular window cut out via SVG mask.
+// mask: white rect (overlay visible everywhere) + black circle (overlay hidden at center)
+// → result: surroundings are dark, circle centre is bright/clear
 function SpotlightSVG({ s }: { s: Step }) {
-  const maskId = "sp";
   return (
     <svg
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+      }}
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <mask id={maskId}>
-          {/* White = show dark overlay; black = transparent cutout */}
+        <mask id="sp">
+          {/* White = let overlay show through; black = hide overlay (exposes the image) */}
           <rect width="100%" height="100%" fill="white" />
-          {s.shape === 'ellipse' ? (
-            <ellipse cx={s.cx} cy={s.cy} rx={s.rx} ry={s.ry} fill="black" />
-          ) : (
-            <circle cx={s.cx} cy={s.cy} r={s.r} fill="black" />
-          )}
+          <circle cx={s.cx} cy={s.cy} r={s.r} fill="black" />
         </mask>
       </defs>
 
-      {/* Dark overlay with spotlight hole */}
+      {/* Dark overlay — invisible wherever the circle mask cuts out */}
       <rect
         width="100%"
         height="100%"
         fill={`rgba(0,0,0,${s.opacity})`}
-        mask={`url(#${maskId})`}
+        mask="url(#sp)"
       />
 
-      {/* White outline ring */}
-      {s.shape === 'ellipse' ? (
-        <ellipse
-          cx={s.cx} cy={s.cy} rx={s.rx} ry={s.ry}
-          fill="none"
-          stroke="rgba(255,255,255,0.85)"
-          strokeWidth="3"
-        />
-      ) : (
-        <circle
-          cx={s.cx} cy={s.cy} r={s.r}
-          fill="none"
-          stroke="rgba(255,255,255,0.85)"
-          strokeWidth="3"
-        />
-      )}
+      {/* White ring outline around the spotlight */}
+      <circle
+        cx={s.cx}
+        cy={s.cy}
+        r={s.r}
+        fill="none"
+        stroke="rgba(255,255,255,0.85)"
+        strokeWidth="3"
+      />
     </svg>
   );
 }
@@ -109,7 +108,6 @@ export default function DeviceJourney() {
   const sectionRef    = useRef<HTMLDivElement>(null);
   const inView        = useInView(sectionRef, { once: true, amount: 0.15 });
   const lastManualRef = useRef<number>(0);
-
   const [activeStep, setActiveStep] = useState(0);
 
   function handleClick(i: number) {
@@ -117,11 +115,11 @@ export default function DeviceJourney() {
     setActiveStep(i);
   }
 
-  // Auto-advance every 4s; pauses for 8s after any manual click
+  // Auto-advance every 4 s; pauses 8 s after any manual click
   useEffect(() => {
     const id = setInterval(() => {
       if (Date.now() - lastManualRef.current >= 8000) {
-        setActiveStep((s) => (s + 1) % steps.length);
+        setActiveStep((prev) => (prev + 1) % steps.length);
       }
     }, 4000);
     return () => clearInterval(id);
@@ -148,7 +146,7 @@ export default function DeviceJourney() {
           </p>
         </motion.div>
 
-        {/* ══ MOBILE: tabs + spotlight ════════════════════════════════════ */}
+        {/* ══ MOBILE: tabs on top, spotlight below ════════════════════════ */}
         <div className="md:hidden">
           {/* Tab bar */}
           <div className="flex gap-2 pb-3 mb-5 justify-center flex-wrap">
@@ -169,33 +167,55 @@ export default function DeviceJourney() {
           </div>
 
           {/* Spotlight panel — mobile */}
-          <div style={{ position: 'relative', width: '100%', height: '280px', borderRadius: '16px', overflow: 'hidden', backgroundColor: '#1a1a2e' }}>
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "280px",
+              borderRadius: "16px",
+              overflow: "hidden",
+              backgroundColor: "#1a1a2e",
+            }}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               key={activeStep}
               src={s.image}
               alt={s.label}
               style={{
-                position: 'absolute', top: 0, left: 0,
-                width: '100%', height: '100%',
-                objectFit: 'contain',
-                objectPosition: s.objectPosition ?? 'top',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                objectPosition: s.objectPosition ?? "top",
               }}
             />
             <SpotlightSVG s={s} />
           </div>
 
-          <div style={{ marginTop: '16px', padding: '16px', backgroundColor: 'rgba(22,183,232,0.08)', borderRight: '4px solid #16B7E8', borderRadius: '12px', textAlign: 'right' }}>
-            <p style={{ color: '#0D2B4E', fontWeight: 500, fontSize: '14px', margin: 0 }}>
+          <div
+            style={{
+              marginTop: "16px",
+              padding: "16px",
+              backgroundColor: "rgba(22,183,232,0.08)",
+              borderRight: "4px solid #16B7E8",
+              borderRadius: "12px",
+              textAlign: "right",
+            }}
+          >
+            <p style={{ color: "#0D2B4E", fontWeight: 500, fontSize: "14px", margin: 0 }}>
               {s.callout}
             </p>
           </div>
         </div>
 
-        {/* ══ DESKTOP: image (left 55%) + step list (right 45%) ══════════ */}
+        {/* ══ DESKTOP: step list (right, 45fr) + spotlight (left, 55fr) ══ */}
+        {/* RTL: first DOM child → right column; second DOM child → left column */}
         <div className="hidden md:grid md:grid-cols-[45fr_55fr] gap-8 items-start">
 
-          {/* Step list — first in DOM = right in RTL */}
+          {/* ── Step list (right column in RTL) ──────────────────────────── */}
           <motion.div
             className="flex flex-col gap-1 pt-2"
             initial={{ opacity: 0, x: 20 }}
@@ -258,37 +278,60 @@ export default function DeviceJourney() {
             </div>
           </motion.div>
 
-          {/* Spotlight panel — second in DOM = left in RTL (55fr / wider) */}
+          {/* ── Spotlight panel (left column in RTL, 55fr = wider) ────────── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           >
-            <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '16px', overflow: 'hidden', backgroundColor: '#1a1a2e' }}>
+            {/* Image + SVG overlay container — explicit height so <img> fills it */}
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                height: "500px",
+                borderRadius: "16px",
+                overflow: "hidden",
+                backgroundColor: "#1a1a2e",
+              }}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 key={activeStep}
                 src={s.image}
                 alt={s.label}
                 style={{
-                  position: 'absolute', top: 0, left: 0,
-                  width: '100%', height: '100%',
-                  objectFit: 'contain',
-                  objectPosition: s.objectPosition ?? 'top',
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  objectPosition: s.objectPosition ?? "top",
                 }}
               />
+              {/* SVG spotlight sits on top of the image */}
               <SpotlightSVG s={s} />
             </div>
 
-            <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'rgba(22,183,232,0.08)', borderRight: '4px solid #16B7E8', borderRadius: '12px', textAlign: 'right' }}>
-              <p style={{ color: '#0D2B4E', fontWeight: 500, fontSize: '16px', margin: 0 }}>
+            {/* Callout box — outside the overflow:hidden container */}
+            <div
+              style={{
+                marginTop: "20px",
+                padding: "16px",
+                backgroundColor: "rgba(22,183,232,0.08)",
+                borderRight: "4px solid #16B7E8",
+                borderRadius: "12px",
+                textAlign: "right",
+              }}
+            >
+              <p style={{ color: "#0D2B4E", fontWeight: 500, fontSize: "16px", margin: 0 }}>
                 {s.callout}
               </p>
             </div>
           </motion.div>
 
         </div>
-
       </div>
     </section>
   );
