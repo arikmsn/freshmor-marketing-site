@@ -58,10 +58,11 @@ const steps: Step[] = [
 ];
 
 /* ─── SpotlightSVG ─────────────────────────────────────────────────────────── */
-// Dark overlay with a circular window cut out via SVG mask.
-// mask: white rect (overlay visible everywhere) + black circle (overlay hidden at center)
-// → result: surroundings are dark, circle centre is bright/clear
-function SpotlightSVG({ s }: { s: Step }) {
+// maskId MUST be unique across the entire DOM — both mobile and desktop panels
+// exist in the DOM simultaneously (hidden via CSS), so a shared id="sp" causes
+// the desktop mask to resolve to the hidden mobile element → overlay disappears.
+// Pass a distinct maskId per panel+step, e.g. "spotlight-mask-desktop-0".
+function SpotlightSVG({ s, maskId }: { s: Step; maskId: string }) {
   return (
     <svg
       style={{
@@ -75,29 +76,30 @@ function SpotlightSVG({ s }: { s: Step }) {
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <mask id="sp">
-          {/* White = let overlay show through; black = hide overlay (exposes the image) */}
+        <mask id={maskId}>
+          {/* White = overlay visible; black = overlay hidden (image shows through) */}
           <rect width="100%" height="100%" fill="white" />
           <circle cx={s.cx} cy={s.cy} r={s.r} fill="black" />
         </mask>
       </defs>
 
-      {/* Dark overlay — invisible wherever the circle mask cuts out */}
+      {/* Dark overlay — cut out at the circle position */}
       <rect
         width="100%"
         height="100%"
-        fill={`rgba(0,0,0,${s.opacity})`}
-        mask="url(#sp)"
+        fill="rgba(0,0,0,0.65)"
+        mask={`url(#${maskId})`}
       />
 
-      {/* White ring outline around the spotlight */}
+      {/* White ring border around the spotlight */}
       <circle
         cx={s.cx}
         cy={s.cy}
         r={s.r}
         fill="none"
-        stroke="rgba(255,255,255,0.85)"
-        strokeWidth="3"
+        stroke="white"
+        strokeWidth="2"
+        opacity="0.8"
       />
     </svg>
   );
@@ -192,7 +194,7 @@ export default function DeviceJourney() {
                 objectPosition: s.objectPosition ?? "top",
               }}
             />
-            <SpotlightSVG s={s} />
+            <SpotlightSVG s={s} maskId={`spotlight-mask-mobile-${activeStep}`} />
           </div>
 
           <div
@@ -284,12 +286,12 @@ export default function DeviceJourney() {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           >
-            {/* Image + SVG overlay container — explicit height so <img> fills it */}
+            {/* Image + SVG overlay container */}
             <div
               style={{
                 position: "relative",
                 width: "100%",
-                height: "500px",
+                minHeight: "480px",
                 borderRadius: "16px",
                 overflow: "hidden",
                 backgroundColor: "#1a1a2e",
@@ -310,8 +312,8 @@ export default function DeviceJourney() {
                   objectPosition: s.objectPosition ?? "top",
                 }}
               />
-              {/* SVG spotlight sits on top of the image */}
-              <SpotlightSVG s={s} />
+              {/* SVG spotlight — unique maskId avoids collision with mobile panel in DOM */}
+              <SpotlightSVG s={s} maskId={`spotlight-mask-desktop-${activeStep}`} />
             </div>
 
             {/* Callout box — outside the overflow:hidden container */}
