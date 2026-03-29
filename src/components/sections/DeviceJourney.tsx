@@ -3,52 +3,48 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { ChevronLeft, Lightbulb } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 /* ─── step data ────────────────────────────────────────────────────────────── */
 const steps = [
   {
-    id: 1,
     label: "מחסן",
     description: "הציוד ממתין לפריסה",
     image: "/stuff/Main.png",
     spotlightX: "50%",
-    spotlightY: "28%",
-    spotlightRadius: 80,
-    overlayOpacity: 0.4,
+    spotlightY: "32%",
+    spotlightRadius: 72,
+    overlayOpacity: 0.55,
     callout: "כל הנכסים ממתינים מסודרים. פרשמור יודעת מה יוצא, מתי ולאן.",
   },
   {
-    id: 2,
     label: "פריסה",
     description: "מותקן אצל הלקוח",
     image: "/stuff/WorkOrder.png",
-    spotlightX: "25%",
-    spotlightY: "45%",
-    spotlightRadius: 80,
-    overlayOpacity: 0.4,
+    spotlightX: "22%",
+    spotlightY: "48%",
+    spotlightRadius: 72,
+    overlayOpacity: 0.55,
     callout: "כרטיס עבודה מפורט לכל פריסה. הטכנאי יודע בדיוק מה לעשות.",
   },
   {
-    id: 3,
     label: "ביקור",
     description: "ביקור ביניים ותיעוד",
     image: "/stuff/Jobs.png",
     spotlightX: "50%",
-    spotlightY: "38%",
-    spotlightRadius: 75,
-    overlayOpacity: 0.4,
+    spotlightY: "35%",
+    spotlightRadius: 68,
+    overlayOpacity: 0.55,
     callout: "יומן העבודה מתעדכן אוטומטית. אף ביקור לא נשכח.",
   },
   {
-    id: 4,
     label: "החזרה",
     description: "נאסף ומוחזר למחסן",
     image: "/stuff/Map.png",
-    spotlightX: "55%",
-    spotlightY: "42%",
-    spotlightRadius: 100,
-    overlayOpacity: 0.25,
+    spotlightX: "40%",
+    spotlightY: "55%",
+    spotlightRadius: 95,
+    overlayOpacity: 0.3,
     callout: "המפה מראה בדיוק מה צריך לאסוף ואיפה. כל נסיעה שווה את הזמן.",
   },
 ];
@@ -60,115 +56,21 @@ export default function DeviceJourney() {
   const lastManualRef = useRef<number>(0);
 
   const [activeStep, setActiveStep] = useState(0);
-  const [panelOpacity, setPanelOpacity] = useState(1);
 
-  // Navigate to a step with a brief opacity fade
-  function goTo(i: number) {
-    if (i === activeStep) return;
+  function handleClick(i: number) {
     lastManualRef.current = Date.now();
-    setPanelOpacity(0);
-    setTimeout(() => {
-      setActiveStep(i);
-      setPanelOpacity(1);
-    }, 200);
+    setActiveStep(i);
   }
 
-  // Auto-advance every 4s, skips if user clicked within the last 8s
+  // Auto-advance every 4s; pauses for 8s after any manual click
   useEffect(() => {
     const id = setInterval(() => {
       if (Date.now() - lastManualRef.current >= 8000) {
-        setPanelOpacity(0);
-        setTimeout(() => {
-          setActiveStep((s) => (s + 1) % steps.length);
-          setPanelOpacity(1);
-        }, 200);
+        setActiveStep((s) => (s + 1) % steps.length);
       }
     }, 4000);
     return () => clearInterval(id);
   }, []);
-
-  const s = steps[activeStep];
-
-  /* ─── spotlight panel JSX (inline — not a nested component) ─────────────── */
-  function spotlightPanel(minH: string, mobileRadius?: number) {
-    const radius = mobileRadius ?? s.spotlightRadius;
-    return (
-      <div
-        className="relative rounded-3xl shadow-xl overflow-hidden bg-slate-900"
-        style={{ minHeight: minH }}
-      >
-        {/* Image + overlay wrapped for opacity fade */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            transition: "opacity 0.2s ease",
-            opacity: panelOpacity,
-          }}
-        >
-          {/* Image */}
-          <div style={{ position: "relative", width: "100%", height: "100%" }}>
-            <Image
-              key={activeStep}
-              src={s.image}
-              alt={s.label}
-              fill
-              style={{ objectFit: "cover" }}
-              priority
-            />
-          </div>
-
-          {/* Dark overlay with radial cutout */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: `radial-gradient(
-                circle ${radius}px
-                at ${s.spotlightX} ${s.spotlightY},
-                transparent ${radius - 2}px,
-                rgba(0,0,0,${s.overlayOpacity}) ${radius}px
-              )`,
-            }}
-          />
-
-          {/* White spotlight ring — centered on spotlight point */}
-          <div
-            style={{
-              position: "absolute",
-              left: s.spotlightX,
-              top: s.spotlightY,
-              transform: "translate(-50%, -50%)",
-              width: radius * 2,
-              height: radius * 2,
-              borderRadius: "50%",
-              border: "4px solid rgba(255,255,255,0.85)",
-              boxShadow:
-                "0 0 0 2px rgba(255,255,255,0.3), 0 8px 32px rgba(0,0,0,0.4)",
-              pointerEvents: "none",
-            }}
-          />
-        </div>
-
-        {/* Callout box — outside the fading wrapper so text doesn't flash */}
-        <div className="absolute bottom-0 start-0 end-0 z-20 p-4">
-          <div
-            style={{ transition: "opacity 0.2s ease", opacity: panelOpacity }}
-            className="bg-white shadow-md border-r-4 border-brand-cyan rounded-xl p-5 flex items-start gap-3"
-          >
-            <Lightbulb
-              className="w-4 h-4 text-brand-cyan shrink-0 mt-0.5"
-              strokeWidth={2}
-              aria-hidden
-            />
-            <p className="text-sm font-medium text-brand-primary leading-relaxed">
-              {s.callout}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <section ref={sectionRef} className="bg-brand-surface py-16 lg:py-24 scroll-mt-16">
@@ -189,13 +91,14 @@ export default function DeviceJourney() {
           </p>
         </motion.div>
 
-        {/* ══ MOBILE: horizontal tab bar + spotlight below ═══════════════ */}
+        {/* ══ MOBILE: tabs + spotlight ════════════════════════════════════ */}
         <div className="lg:hidden">
-          <div className="flex overflow-x-auto gap-2 pb-3 mb-5 justify-center">
+          {/* Tab bar */}
+          <div className="flex gap-2 pb-3 mb-5 justify-center flex-wrap">
             {steps.map((step, i) => (
               <button
-                key={step.id}
-                onClick={() => goTo(i)}
+                key={step.label}
+                onClick={() => handleClick(i)}
                 aria-pressed={i === activeStep}
                 className={`shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                   i === activeStep
@@ -207,10 +110,51 @@ export default function DeviceJourney() {
               </button>
             ))}
           </div>
-          {spotlightPanel("280px", 60)}
+
+          {/* Spotlight panel — mobile */}
+          <div
+            className="relative w-full rounded-2xl overflow-hidden bg-gray-900"
+            style={{ height: "280px" }}
+          >
+            <Image
+              key={activeStep}
+              src={steps[activeStep].image}
+              alt={steps[activeStep].label}
+              fill
+              className="object-cover object-top"
+              priority
+            />
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: `radial-gradient(circle ${steps[activeStep].spotlightRadius * 0.75}px at ${steps[activeStep].spotlightX} ${steps[activeStep].spotlightY}, transparent ${steps[activeStep].spotlightRadius * 0.75}px, rgba(0,0,0,${steps[activeStep].overlayOpacity}) ${steps[activeStep].spotlightRadius * 0.75 + 1}px)`,
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                left: steps[activeStep].spotlightX,
+                top: steps[activeStep].spotlightY,
+                transform: "translate(-50%, -50%)",
+                width: steps[activeStep].spotlightRadius * 1.5 + 8,
+                height: steps[activeStep].spotlightRadius * 1.5 + 8,
+                borderRadius: "50%",
+                border: "3px solid rgba(255,255,255,0.9)",
+                boxShadow: "0 0 24px rgba(0,0,0,0.6)",
+                pointerEvents: "none",
+              }}
+            />
+          </div>
+
+          <div className="mt-4 p-4 bg-brand-cyan/10 border-r-4 border-brand-cyan rounded-xl text-right">
+            <p className="text-brand-primary font-medium text-sm">
+              {steps[activeStep].callout}
+            </p>
+          </div>
         </div>
 
-        {/* ══ DESKTOP: step list (right) + spotlight (left) ═════════════ */}
+        {/* ══ DESKTOP: step list (right) + spotlight (left) ══════════════ */}
         <div className="hidden lg:grid lg:grid-cols-2 gap-10 items-start">
 
           {/* Step list — first in DOM = right in RTL */}
@@ -224,8 +168,9 @@ export default function DeviceJourney() {
               const isActive = i === activeStep;
               return (
                 <button
-                  key={step.id}
-                  onClick={() => goTo(i)}
+                  key={step.label}
+                  onClick={() => handleClick(i)}
+                  aria-pressed={isActive}
                   className={`w-full text-right rounded-xl px-4 py-3 transition-all duration-200 cursor-pointer group ${
                     isActive
                       ? "bg-brand-primary/5 border-r-4 border-brand-cyan"
@@ -243,26 +188,16 @@ export default function DeviceJourney() {
                       {i + 1}
                     </span>
                     <div className="flex-1">
-                      <div
-                        className={`font-bold text-sm ${
-                          isActive ? "text-brand-primary" : "text-slate-600"
-                        }`}
-                      >
+                      <div className={`font-bold text-sm ${isActive ? "text-brand-primary" : "text-slate-600"}`}>
                         {step.label}
                       </div>
-                      <div
-                        className={`text-xs mt-0.5 ${
-                          isActive ? "text-brand-mid" : "text-slate-400"
-                        }`}
-                      >
+                      <div className={`text-xs mt-0.5 ${isActive ? "text-brand-mid" : "text-slate-400"}`}>
                         {step.description}
                       </div>
                     </div>
                     <ChevronLeft
                       className={`w-4 h-4 shrink-0 transition-colors ${
-                        isActive
-                          ? "text-brand-cyan"
-                          : "text-slate-300 group-hover:text-slate-400"
+                        isActive ? "text-brand-cyan" : "text-slate-300 group-hover:text-slate-400"
                       }`}
                       strokeWidth={2}
                       aria-hidden
@@ -291,7 +226,48 @@ export default function DeviceJourney() {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           >
-            {spotlightPanel("420px")}
+            <div
+              className="relative w-full rounded-2xl overflow-hidden bg-gray-900"
+              style={{ height: "420px" }}
+            >
+              <Image
+                key={activeStep}
+                src={steps[activeStep].image}
+                alt={steps[activeStep].label}
+                fill
+                className="object-cover object-top"
+                priority
+              />
+
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: `radial-gradient(circle ${steps[activeStep].spotlightRadius}px at ${steps[activeStep].spotlightX} ${steps[activeStep].spotlightY}, transparent ${steps[activeStep].spotlightRadius}px, rgba(0,0,0,${steps[activeStep].overlayOpacity}) ${steps[activeStep].spotlightRadius + 1}px)`,
+                }}
+              />
+
+              <div
+                style={{
+                  position: "absolute",
+                  left: steps[activeStep].spotlightX,
+                  top: steps[activeStep].spotlightY,
+                  transform: "translate(-50%, -50%)",
+                  width: steps[activeStep].spotlightRadius * 2 + 8,
+                  height: steps[activeStep].spotlightRadius * 2 + 8,
+                  borderRadius: "50%",
+                  border: "3px solid rgba(255,255,255,0.9)",
+                  boxShadow: "0 0 24px rgba(0,0,0,0.6)",
+                  pointerEvents: "none",
+                }}
+              />
+            </div>
+
+            <div className="mt-4 p-4 bg-brand-cyan/10 border-r-4 border-brand-cyan rounded-xl text-right">
+              <p className="text-brand-primary font-medium text-sm">
+                {steps[activeStep].callout}
+              </p>
+            </div>
           </motion.div>
 
         </div>
