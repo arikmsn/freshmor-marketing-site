@@ -10,7 +10,7 @@ const steps = [
     label: "מחסן",
     description: "הציוד ממתין לפריסה",
     image: "/stuff/Main.png",
-    cx: 38, cy: 68, cr: 70,
+    cx: '47%', cy: '35%', cr: 70,
     opacity: 0.6,
     callout: "כל הנכסים ממתינים מסודרים. פרשמור יודעת מה יוצא, מתי ולאן.",
   },
@@ -18,7 +18,7 @@ const steps = [
     label: "פריסה",
     description: "מותקן אצל הלקוח",
     image: "/stuff/WorkOrder.png",
-    cx: 85, cy: 25, cr: 65,
+    cx: '52%', cy: '52%', cr: 65,
     opacity: 0.6,
     callout: "כרטיס עבודה מפורט לכל פריסה. הטכנאי יודע בדיוק מה לעשות.",
   },
@@ -26,7 +26,7 @@ const steps = [
     label: "ביקור",
     description: "ביקור ביניים ותיעוד",
     image: "/stuff/Jobs.png",
-    cx: 38, cy: 60, cr: 65,
+    cx: '45%', cy: '30%', cr: 65,
     opacity: 0.6,
     callout: "יומן העבודה מתעדכן אוטומטית. אף ביקור לא נשכח.",
   },
@@ -34,7 +34,7 @@ const steps = [
     label: "החזרה",
     description: "נאסף ומוחזר למחסן",
     image: "/stuff/Map.png",
-    cx: 55, cy: 58, cr: 100,
+    cx: '50%', cy: '55%', cr: 100,
     opacity: 0.25,
     objectPosition: 'center' as const,
     callout: "המפה מראה בדיוק מה צריך לאסוף ואיפה. כל נסיעה שווה את הזמן.",
@@ -64,6 +64,8 @@ export default function DeviceJourney() {
     return () => clearInterval(id);
   }, []);
 
+  const s = steps[activeStep];
+
   return (
     <section ref={sectionRef} className="bg-brand-surface py-16 lg:py-24 scroll-mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,7 +86,7 @@ export default function DeviceJourney() {
         </motion.div>
 
         {/* ══ MOBILE: tabs + spotlight ════════════════════════════════════ */}
-        <div className="lg:hidden">
+        <div className="md:hidden">
           {/* Tab bar */}
           <div className="flex gap-2 pb-3 mb-5 justify-center flex-wrap">
             {steps.map((step, i) => (
@@ -108,33 +110,25 @@ export default function DeviceJourney() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               key={activeStep}
-              src={steps[activeStep].image}
-              alt={steps[activeStep].label}
+              src={s.image}
+              alt={s.label}
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: steps[activeStep].objectPosition ?? 'top',
+                position: 'absolute', top: 0, left: 0,
+                width: '100%', height: '100%',
+                objectFit: 'contain',
+                objectPosition: s.objectPosition ?? 'top',
               }}
             />
             <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              background: `radial-gradient(circle ${Math.round(steps[activeStep].cr * 0.75)}px at ${steps[activeStep].cx}% ${steps[activeStep].cy}%, transparent ${Math.round(steps[activeStep].cr * 0.75)}px, rgba(0,0,0,${steps[activeStep].opacity}) ${Math.round(steps[activeStep].cr * 0.75) + 1}px)`,
+              position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+              background: `radial-gradient(circle ${Math.round(s.cr * 0.75)}px at ${s.cx} ${s.cy}, transparent ${Math.round(s.cr * 0.75)}px, rgba(0,0,0,${s.opacity}) ${Math.round(s.cr * 0.75) + 1}px)`,
             }} />
             <div style={{
               position: 'absolute',
-              left: `${steps[activeStep].cx}%`,
-              top: `${steps[activeStep].cy}%`,
+              left: s.cx, top: s.cy,
               transform: 'translate(-50%, -50%)',
-              width: Math.round(steps[activeStep].cr * 1.5) + 8,
-              height: Math.round(steps[activeStep].cr * 1.5) + 8,
+              width: Math.round(s.cr * 1.5) + 8,
+              height: Math.round(s.cr * 1.5) + 8,
               borderRadius: '50%',
               border: '3px solid rgba(255,255,255,0.85)',
               boxShadow: '0 0 0 1px rgba(255,255,255,0.2), 0 4px 20px rgba(0,0,0,0.5)',
@@ -144,13 +138,15 @@ export default function DeviceJourney() {
 
           <div style={{ marginTop: '16px', padding: '16px', backgroundColor: 'rgba(22,183,232,0.08)', borderRight: '4px solid #16B7E8', borderRadius: '12px', textAlign: 'right' }}>
             <p style={{ color: '#0D2B4E', fontWeight: 500, fontSize: '14px', margin: 0 }}>
-              {steps[activeStep].callout}
+              {s.callout}
             </p>
           </div>
         </div>
 
-        {/* ══ DESKTOP: step list (right) + spotlight (left) ══════════════ */}
-        <div className="hidden lg:grid lg:grid-cols-[1fr_minmax(280px,_340px)] gap-6 items-start">
+        {/* ══ DESKTOP: image (left) + step list (right) ═══════════════════ */}
+        {/* In RTL: first DOM child = right, second DOM child = left        */}
+        {/* DOM order: steps (right col, 45fr) | image (left col, 55fr)     */}
+        <div className="hidden md:grid md:grid-cols-[45fr_55fr] gap-8 items-start">
 
           {/* Step list — first in DOM = right in RTL */}
           <motion.div
@@ -215,43 +211,35 @@ export default function DeviceJourney() {
             </div>
           </motion.div>
 
-          {/* Spotlight panel — second in DOM = left in RTL */}
+          {/* Spotlight panel — second in DOM = left in RTL (55fr / wider) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           >
-            <div style={{ position: 'relative', width: '100%', height: '420px', borderRadius: '16px', overflow: 'hidden', backgroundColor: '#1a1a2e' }}>
+            <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '16px', overflow: 'hidden', backgroundColor: '#1a1a2e' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 key={activeStep}
-                src={steps[activeStep].image}
-                alt={steps[activeStep].label}
+                src={s.image}
+                alt={s.label}
                 style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: steps[activeStep].objectPosition ?? 'top',
+                  position: 'absolute', top: 0, left: 0,
+                  width: '100%', height: '100%',
+                  objectFit: 'contain',
+                  objectPosition: s.objectPosition ?? 'top',
                 }}
               />
               <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: `radial-gradient(circle ${steps[activeStep].cr}px at ${steps[activeStep].cx}% ${steps[activeStep].cy}%, transparent ${steps[activeStep].cr}px, rgba(0,0,0,${steps[activeStep].opacity}) ${steps[activeStep].cr + 1}px)`,
+                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                background: `radial-gradient(circle ${s.cr}px at ${s.cx} ${s.cy}, transparent ${s.cr}px, rgba(0,0,0,${s.opacity}) ${s.cr + 1}px)`,
               }} />
               <div style={{
                 position: 'absolute',
-                left: `${steps[activeStep].cx}%`,
-                top: `${steps[activeStep].cy}%`,
+                left: s.cx, top: s.cy,
                 transform: 'translate(-50%, -50%)',
-                width: steps[activeStep].cr * 2 + 8,
-                height: steps[activeStep].cr * 2 + 8,
+                width: s.cr * 2 + 8,
+                height: s.cr * 2 + 8,
                 borderRadius: '50%',
                 border: '3px solid rgba(255,255,255,0.85)',
                 boxShadow: '0 0 0 1px rgba(255,255,255,0.2), 0 4px 20px rgba(0,0,0,0.5)',
@@ -261,7 +249,7 @@ export default function DeviceJourney() {
 
             <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'rgba(22,183,232,0.08)', borderRight: '4px solid #16B7E8', borderRadius: '12px', textAlign: 'right' }}>
               <p style={{ color: '#0D2B4E', fontWeight: 500, fontSize: '16px', margin: 0 }}>
-                {steps[activeStep].callout}
+                {s.callout}
               </p>
             </div>
           </motion.div>
