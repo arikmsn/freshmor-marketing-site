@@ -26,7 +26,7 @@ const steps = [
     label: "ביקור",
     description: "ביקור ביניים ותיעוד",
     image: "/stuff/Jobs.png",
-    cx: 38, cy: 74, cr: 65,
+    cx: 38, cy: 60, cr: 65,
     opacity: 0.6,
     callout: "יומן העבודה מתעדכן אוטומטית. אף ביקור לא נשכח.",
   },

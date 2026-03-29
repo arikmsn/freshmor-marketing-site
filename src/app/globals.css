@@ -1,6 +1,28 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+/* ─── Leaflet popup — RTL freshmor style ────────────────────────────────────── */
+.freshmor-popup .leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  direction: rtl;
+  text-align: right;
+  font-family: inherit;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+.freshmor-popup .leaflet-popup-content {
+  margin: 12px 16px;
+}
+.freshmor-popup .leaflet-popup-tip-container {
+  display: none;
+}
+
+/* ─── Leaflet attribution — subtle ─────────────────────────────────────────── */
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  opacity: 0.5;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #1a2a3a;
