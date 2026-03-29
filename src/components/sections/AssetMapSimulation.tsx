@@ -127,21 +127,22 @@ export default function AssetMapSimulation() {
         >
           <div className="p-5 sm:p-8 lg:p-10">
 
-            {/* Card header: eyebrow + time selector */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-7">
-              <div className="flex items-center gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-brand-cyan shrink-0" aria-hidden="true" />
-                <span className="text-sm font-semibold text-brand-primary/70 tracking-wide">
-                  מפת הנכסים בפעולה
+            {/* ── Row 1: eyebrow label — right-aligned, alone ─────────────── */}
+            <div className="flex items-center justify-end gap-2.5 mb-4">
+              <span className="w-2 h-2 rounded-full bg-brand-cyan shrink-0" aria-hidden="true" />
+              <span className="text-sm font-semibold text-brand-primary/70 tracking-wide">
+                מפת הנכסים בפעולה
+              </span>
+              {isPlaying && (
+                <span className="flex items-center gap-1 text-xs text-brand-cyan font-semibold" role="status" aria-live="polite">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" aria-hidden="true" />
+                  סיור פעיל
                 </span>
-                {isPlaying && (
-                  <span className="flex items-center gap-1 text-xs text-brand-cyan font-semibold" role="status" aria-live="polite">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" aria-hidden="true" />
-                    סיור פעיל
-                  </span>
-                )}
-              </div>
-              {/* Time-window selector */}
+              )}
+            </div>
+
+            {/* ── Row 2: date tabs centered ────────────────────────────────── */}
+            <div className="flex justify-center mb-6">
               <div
                 className="inline-flex rounded-xl border border-brand-cyan/25 bg-white/80 p-1 gap-1 shadow-sm"
                 role="group"
@@ -164,17 +165,18 @@ export default function AssetMapSimulation() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 lg:items-center">
+            {/* ── Row 3: map (left) + text blocks (right) ─────────────────── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 lg:items-start">
 
-              {/* Interactive module */}
+              {/* Map column — lg:order-last = left side in RTL */}
               <div className="lg:order-last flex flex-col gap-4">
 
                 {/* Map container */}
-                <div className="relative w-full rounded-2xl overflow-hidden border border-brand-cyan/25 shadow-sm"
+                <div
+                  className="relative w-full rounded-2xl overflow-hidden border border-brand-cyan/25 shadow-sm"
                   style={{ height: "300px" }}
                   aria-label="מפת נכסים אינטראקטיבית של אזור גוש דן"
                 >
-                  {/* Actual Leaflet map — SSR disabled */}
                   <MapComponent activeWindow={activeWindow} />
 
                   {/* Play/pause button — absolute overlay bottom-left */}
@@ -202,7 +204,7 @@ export default function AssetMapSimulation() {
                   </div>
                 </div>
 
-                {/* Legend / summary */}
+                {/* ── Row 4: summary legend — stays below the map ─────────── */}
                 <motion.div
                   className="bg-white border border-brand-cyan/25 rounded-2xl px-5 py-4 shadow-sm"
                   initial={{ opacity: 0, y: 12 }}
@@ -257,8 +259,8 @@ export default function AssetMapSimulation() {
 
               </div>
 
-              {/* Text blocks */}
-              <div className="lg:order-first space-y-6">
+              {/* Text blocks — lg:order-first = right side in RTL, aligned to top of map */}
+              <div className="lg:order-first flex flex-col justify-center gap-6">
                 {TEXT_BLOCKS.map((block, i) => (
                   <motion.div
                     key={block.id}

@@ -4,13 +4,28 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 
+/* ─── types ─────────────────────────────────────────────────────────────────── */
+type StepBase = {
+  label: string;
+  description: string;
+  image: string;
+  cx: string;
+  cy: string;
+  opacity: number;
+  objectPosition?: 'center';
+  callout: string;
+};
+type Step =
+  | (StepBase & { shape: 'circle';  r: string })
+  | (StepBase & { shape: 'ellipse'; rx: string; ry: string });
+
 /* ─── step data ────────────────────────────────────────────────────────────── */
-const steps = [
+const steps: Step[] = [
   {
     label: "מחסן",
     description: "הציוד ממתין לפריסה",
     image: "/stuff/Main.png",
-    cx: '47%', cy: '35%', cr: 70,
+    shape: 'circle', cx: '47%', cy: '35%', r: '22%',
     opacity: 0.6,
     callout: "כל הנכסים ממתינים מסודרים. פרשמור יודעת מה יוצא, מתי ולאן.",
   },
@@ -18,7 +33,7 @@ const steps = [
     label: "פריסה",
     description: "מותקן אצל הלקוח",
     image: "/stuff/WorkOrder.png",
-    cx: '52%', cy: '52%', cr: 65,
+    shape: 'ellipse', cx: '60%', cy: '52%', rx: '45%', ry: '8%',
     opacity: 0.6,
     callout: "כרטיס עבודה מפורט לכל פריסה. הטכנאי יודע בדיוק מה לעשות.",
   },
@@ -26,7 +41,7 @@ const steps = [
     label: "ביקור",
     description: "ביקור ביניים ותיעוד",
     image: "/stuff/Jobs.png",
-    cx: '45%', cy: '30%', cr: 65,
+    shape: 'circle', cx: '45%', cy: '30%', r: '22%',
     opacity: 0.6,
     callout: "יומן העבודה מתעדכן אוטומטית. אף ביקור לא נשכח.",
   },
@@ -34,12 +49,60 @@ const steps = [
     label: "החזרה",
     description: "נאסף ומוחזר למחסן",
     image: "/stuff/Map.png",
-    cx: '50%', cy: '55%', cr: 100,
+    shape: 'circle', cx: '50%', cy: '55%', r: '25%',
     opacity: 0.25,
-    objectPosition: 'center' as const,
+    objectPosition: 'center',
     callout: "המפה מראה בדיוק מה צריך לאסוף ואיפה. כל נסיעה שווה את הזמן.",
   },
 ];
+
+/* ─── SpotlightSVG — circle or ellipse cutout via SVG mask ──────────────────── */
+function SpotlightSVG({ s }: { s: Step }) {
+  const maskId = "sp";
+  return (
+    <svg
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <mask id={maskId}>
+          {/* White = show dark overlay; black = transparent cutout */}
+          <rect width="100%" height="100%" fill="white" />
+          {s.shape === 'ellipse' ? (
+            <ellipse cx={s.cx} cy={s.cy} rx={s.rx} ry={s.ry} fill="black" />
+          ) : (
+            <circle cx={s.cx} cy={s.cy} r={s.r} fill="black" />
+          )}
+        </mask>
+      </defs>
+
+      {/* Dark overlay with spotlight hole */}
+      <rect
+        width="100%"
+        height="100%"
+        fill={`rgba(0,0,0,${s.opacity})`}
+        mask={`url(#${maskId})`}
+      />
+
+      {/* White outline ring */}
+      {s.shape === 'ellipse' ? (
+        <ellipse
+          cx={s.cx} cy={s.cy} rx={s.rx} ry={s.ry}
+          fill="none"
+          stroke="rgba(255,255,255,0.85)"
+          strokeWidth="3"
+        />
+      ) : (
+        <circle
+          cx={s.cx} cy={s.cy} r={s.r}
+          fill="none"
+          stroke="rgba(255,255,255,0.85)"
+          strokeWidth="3"
+        />
+      )}
+    </svg>
+  );
+}
 
 /* ─── DeviceJourney ────────────────────────────────────────────────────────── */
 export default function DeviceJourney() {
@@ -119,21 +182,7 @@ export default function DeviceJourney() {
                 objectPosition: s.objectPosition ?? 'top',
               }}
             />
-            <div style={{
-              position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-              background: `radial-gradient(circle ${Math.round(s.cr * 0.75)}px at ${s.cx} ${s.cy}, transparent ${Math.round(s.cr * 0.75)}px, rgba(0,0,0,${s.opacity}) ${Math.round(s.cr * 0.75) + 1}px)`,
-            }} />
-            <div style={{
-              position: 'absolute',
-              left: s.cx, top: s.cy,
-              transform: 'translate(-50%, -50%)',
-              width: Math.round(s.cr * 1.5) + 8,
-              height: Math.round(s.cr * 1.5) + 8,
-              borderRadius: '50%',
-              border: '3px solid rgba(255,255,255,0.85)',
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.2), 0 4px 20px rgba(0,0,0,0.5)',
-              pointerEvents: 'none',
-            }} />
+            <SpotlightSVG s={s} />
           </div>
 
           <div style={{ marginTop: '16px', padding: '16px', backgroundColor: 'rgba(22,183,232,0.08)', borderRight: '4px solid #16B7E8', borderRadius: '12px', textAlign: 'right' }}>
@@ -143,9 +192,7 @@ export default function DeviceJourney() {
           </div>
         </div>
 
-        {/* ══ DESKTOP: image (left) + step list (right) ═══════════════════ */}
-        {/* In RTL: first DOM child = right, second DOM child = left        */}
-        {/* DOM order: steps (right col, 45fr) | image (left col, 55fr)     */}
+        {/* ══ DESKTOP: image (left 55%) + step list (right 45%) ══════════ */}
         <div className="hidden md:grid md:grid-cols-[45fr_55fr] gap-8 items-start">
 
           {/* Step list — first in DOM = right in RTL */}
@@ -230,21 +277,7 @@ export default function DeviceJourney() {
                   objectPosition: s.objectPosition ?? 'top',
                 }}
               />
-              <div style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                background: `radial-gradient(circle ${s.cr}px at ${s.cx} ${s.cy}, transparent ${s.cr}px, rgba(0,0,0,${s.opacity}) ${s.cr + 1}px)`,
-              }} />
-              <div style={{
-                position: 'absolute',
-                left: s.cx, top: s.cy,
-                transform: 'translate(-50%, -50%)',
-                width: s.cr * 2 + 8,
-                height: s.cr * 2 + 8,
-                borderRadius: '50%',
-                border: '3px solid rgba(255,255,255,0.85)',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.2), 0 4px 20px rgba(0,0,0,0.5)',
-                pointerEvents: 'none',
-              }} />
+              <SpotlightSVG s={s} />
             </div>
 
             <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'rgba(22,183,232,0.08)', borderRight: '4px solid #16B7E8', borderRadius: '12px', textAlign: 'right' }}>
