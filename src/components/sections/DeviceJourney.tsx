@@ -2,7 +2,6 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 
 /* ─── step data ────────────────────────────────────────────────────────────── */
@@ -11,40 +10,32 @@ const steps = [
     label: "מחסן",
     description: "הציוד ממתין לפריסה",
     image: "/stuff/Main.png",
-    spotlightX: "30%",
-    spotlightY: "68%",
-    spotlightRadius: 62,
-    overlayOpacity: 0.6,
+    cx: 38, cy: 28, cr: 70,
+    opacity: 0.6,
     callout: "כל הנכסים ממתינים מסודרים. פרשמור יודעת מה יוצא, מתי ולאן.",
   },
   {
     label: "פריסה",
     description: "מותקן אצל הלקוח",
     image: "/stuff/WorkOrder.png",
-    spotlightX: "78%",
-    spotlightY: "25%",
-    spotlightRadius: 60,
-    overlayOpacity: 0.6,
+    cx: 85, cy: 13, cr: 65,
+    opacity: 0.6,
     callout: "כרטיס עבודה מפורט לכל פריסה. הטכנאי יודע בדיוק מה לעשות.",
   },
   {
     label: "ביקור",
     description: "ביקור ביניים ותיעוד",
     image: "/stuff/Jobs.png",
-    spotlightX: "18%",
-    spotlightY: "62%",
-    spotlightRadius: 58,
-    overlayOpacity: 0.6,
+    cx: 30, cy: 35, cr: 65,
+    opacity: 0.6,
     callout: "יומן העבודה מתעדכן אוטומטית. אף ביקור לא נשכח.",
   },
   {
     label: "החזרה",
     description: "נאסף ומוחזר למחסן",
     image: "/stuff/Map.png",
-    spotlightX: "38%",
-    spotlightY: "52%",
-    spotlightRadius: 100,
-    overlayOpacity: 0.25,
+    cx: 55, cy: 62, cr: 100,
+    opacity: 0.25,
     callout: "המפה מראה בדיוק מה צריך לאסוף ואיפה. כל נסיעה שווה את הזמן.",
   },
 ];
@@ -112,43 +103,46 @@ export default function DeviceJourney() {
           </div>
 
           {/* Spotlight panel — mobile */}
-          <div
-            className="relative w-full rounded-2xl overflow-hidden bg-gray-900"
-            style={{ height: "280px" }}
-          >
-            <Image
+          <div style={{ position: 'relative', width: '100%', height: '280px', borderRadius: '16px', overflow: 'hidden', backgroundColor: '#1a1a2e' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               key={activeStep}
               src={steps[activeStep].image}
               alt={steps[activeStep].label}
-              fill
-              className="object-cover object-top"
-              priority
-            />
-            <div
               style={{
-                position: "absolute",
-                inset: 0,
-                background: `radial-gradient(circle ${steps[activeStep].spotlightRadius * 0.75}px at ${steps[activeStep].spotlightX} ${steps[activeStep].spotlightY}, transparent ${steps[activeStep].spotlightRadius * 0.75}px, rgba(0,0,0,${steps[activeStep].overlayOpacity}) ${steps[activeStep].spotlightRadius * 0.75 + 1}px)`,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'top',
               }}
             />
-            <div
-              style={{
-                position: "absolute",
-                left: steps[activeStep].spotlightX,
-                top: steps[activeStep].spotlightY,
-                transform: "translate(-50%, -50%)",
-                width: steps[activeStep].spotlightRadius * 1.5 + 8,
-                height: steps[activeStep].spotlightRadius * 1.5 + 8,
-                borderRadius: "50%",
-                border: "3px solid rgba(255,255,255,0.9)",
-                boxShadow: "0 0 24px rgba(0,0,0,0.6)",
-                pointerEvents: "none",
-              }}
-            />
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: `radial-gradient(circle ${Math.round(steps[activeStep].cr * 0.75)}px at ${steps[activeStep].cx}% ${steps[activeStep].cy}%, transparent ${Math.round(steps[activeStep].cr * 0.75)}px, rgba(0,0,0,${steps[activeStep].opacity}) ${Math.round(steps[activeStep].cr * 0.75) + 1}px)`,
+            }} />
+            <div style={{
+              position: 'absolute',
+              left: `${steps[activeStep].cx}%`,
+              top: `${steps[activeStep].cy}%`,
+              transform: 'translate(-50%, -50%)',
+              width: Math.round(steps[activeStep].cr * 1.5) + 8,
+              height: Math.round(steps[activeStep].cr * 1.5) + 8,
+              borderRadius: '50%',
+              border: '3px solid rgba(255,255,255,0.85)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.2), 0 4px 20px rgba(0,0,0,0.5)',
+              pointerEvents: 'none',
+            }} />
           </div>
 
-          <div className="mt-4 p-4 bg-brand-cyan/10 border-r-4 border-brand-cyan rounded-xl text-right">
-            <p className="text-brand-primary font-medium text-sm">
+          <div style={{ marginTop: '16px', padding: '16px', backgroundColor: 'rgba(22,183,232,0.08)', borderRight: '4px solid #16B7E8', borderRadius: '12px', textAlign: 'right' }}>
+            <p style={{ color: '#0D2B4E', fontWeight: 500, fontSize: '14px', margin: 0 }}>
               {steps[activeStep].callout}
             </p>
           </div>
@@ -226,45 +220,46 @@ export default function DeviceJourney() {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           >
-            <div
-              className="relative w-full rounded-2xl overflow-hidden bg-gray-900"
-              style={{ height: "420px" }}
-            >
-              <Image
+            <div style={{ position: 'relative', width: '100%', height: '420px', borderRadius: '16px', overflow: 'hidden', backgroundColor: '#1a1a2e' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 key={activeStep}
                 src={steps[activeStep].image}
                 alt={steps[activeStep].label}
-                fill
-                className="object-cover object-top"
-                priority
-              />
-
-              <div
                 style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: `radial-gradient(circle ${steps[activeStep].spotlightRadius}px at ${steps[activeStep].spotlightX} ${steps[activeStep].spotlightY}, transparent ${steps[activeStep].spotlightRadius}px, rgba(0,0,0,${steps[activeStep].overlayOpacity}) ${steps[activeStep].spotlightRadius + 1}px)`,
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'top',
                 }}
               />
-
-              <div
-                style={{
-                  position: "absolute",
-                  left: steps[activeStep].spotlightX,
-                  top: steps[activeStep].spotlightY,
-                  transform: "translate(-50%, -50%)",
-                  width: steps[activeStep].spotlightRadius * 2 + 8,
-                  height: steps[activeStep].spotlightRadius * 2 + 8,
-                  borderRadius: "50%",
-                  border: "3px solid rgba(255,255,255,0.9)",
-                  boxShadow: "0 0 24px rgba(0,0,0,0.6)",
-                  pointerEvents: "none",
-                }}
-              />
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: `radial-gradient(circle ${steps[activeStep].cr}px at ${steps[activeStep].cx}% ${steps[activeStep].cy}%, transparent ${steps[activeStep].cr}px, rgba(0,0,0,${steps[activeStep].opacity}) ${steps[activeStep].cr + 1}px)`,
+              }} />
+              <div style={{
+                position: 'absolute',
+                left: `${steps[activeStep].cx}%`,
+                top: `${steps[activeStep].cy}%`,
+                transform: 'translate(-50%, -50%)',
+                width: steps[activeStep].cr * 2 + 8,
+                height: steps[activeStep].cr * 2 + 8,
+                borderRadius: '50%',
+                border: '3px solid rgba(255,255,255,0.85)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.2), 0 4px 20px rgba(0,0,0,0.5)',
+                pointerEvents: 'none',
+              }} />
             </div>
 
-            <div className="mt-4 p-4 bg-brand-cyan/10 border-r-4 border-brand-cyan rounded-xl text-right">
-              <p className="text-brand-primary font-medium text-sm">
+            <div style={{ marginTop: '16px', padding: '16px', backgroundColor: 'rgba(22,183,232,0.08)', borderRight: '4px solid #16B7E8', borderRadius: '12px', textAlign: 'right' }}>
+              <p style={{ color: '#0D2B4E', fontWeight: 500, fontSize: '14px', margin: 0 }}>
                 {steps[activeStep].callout}
               </p>
             </div>
