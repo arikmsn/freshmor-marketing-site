@@ -2,65 +2,20 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
+import dynamic from "next/dynamic";
+import { type TimeWindow, type Status, URGENCY_MAP, demoSites } from "./mapData";
 
-type Urgency = "red" | "yellow" | "green";
-type TimeWindow = "היום" | "מחר" | "שבוע הבא";
+/* ─── dynamic import — no SSR ───────────────────────────────────────────────── */
+const MapComponent = dynamic(() => import("./MapInner"), { ssr: false });
 
-interface Site {
-  id: number;
-  name: string;
-  type: string;
-  x: number;
-  y: number;
-}
-
-const SITES: Site[] = [
-  { id: 1, name: "תל אביב מרכז",   type: "יבשן תעשייתי",  x: 38, y: 48 },
-  { id: 2, name: "הרצליה",           type: "חיישן לחות",     x: 30, y: 20 },
-  { id: 3, name: "פתח תקווה",        type: "מכשיר בישום",    x: 57, y: 30 },
-  { id: 4, name: "ראשון לציון",      type: "לוכד מזיקים",    x: 34, y: 65 },
-  { id: 5, name: "חולון",            type: "יבשן תעשייתי",  x: 28, y: 73 },
-  { id: 6, name: "בני ברק",          type: "חיישן לחות",     x: 50, y: 40 },
-  { id: 7, name: "רמת גן",           type: "מכשיר בישום",    x: 47, y: 35 },
-  { id: 8, name: "גבעתיים",          type: "לוכד מזיקים",    x: 44, y: 44 },
-];
-
-const URGENCY_MAP: Record<TimeWindow, Record<number, Urgency>> = {
-  "היום":      { 1: "red",    2: "green",  3: "green",  4: "red",    5: "red",    6: "yellow", 7: "yellow", 8: "green"  },
-  "מחר":       { 1: "yellow", 2: "green",  3: "green",  4: "yellow", 5: "red",    6: "yellow", 7: "green",  8: "green"  },
-  "שבוע הבא": { 1: "yellow", 2: "green",  3: "green",  4: "green",  5: "red",    6: "green",  7: "green",  8: "green"  },
-};
-
-const DOT_BG: Record<Urgency, string>   = { red: "#ef4444", yellow: "#fbbf24", green: "#10b981" };
-const DOT_RING: Record<Urgency, string> = {
-  red:    "rgba(239,68,68,0.3)",
-  yellow: "rgba(251,191,36,0.3)",
-  green:  "rgba(16,185,129,0.3)",
-};
-
-// Urgency-based dot sizes for accessibility (shape/size differentiation, not only color)
-const DOT_OUTER_PX: Record<Urgency, number> = { red: 24, yellow: 20, green: 16 };
-const DOT_INNER_PX: Record<Urgency, number> = { red: 14, yellow: 12, green: 10 };
-
-const LEGEND_DOT: Record<Urgency, string> = {
-  red:    "bg-red-500",
-  yellow: "bg-amber-400",
-  green:  "bg-emerald-500",
-};
-
-const TOOLTIP_BADGE: Record<Urgency, string> = {
-  red:    "bg-red-100 text-red-700",
-  yellow: "bg-amber-100 text-amber-700",
-  green:  "bg-emerald-100 text-emerald-700",
-};
-
-const URGENCY_LABELS: Record<Urgency, string> = {
-  red:    "חריג: דחוף לאיסוף",
-  yellow: "בקרוב: לתכנן",
-  green:  "בזמן: תקין",
-};
-
+/* ─── constants ─────────────────────────────────────────────────────────────── */
 const TIME_WINDOWS: TimeWindow[] = ["היום", "מחר", "שבוע הבא"];
+
+const LEGEND_CONFIG: Record<Status, { color: string; dotSize: number; label: string }> = {
+  urgent: { color: "#ef4444", dotSize: 14, label: "דחופים לאיסוף" },
+  soon:   { color: "#f97316", dotSize: 12, label: "בקרוב"          },
+  ok:     { color: "#22c55e", dotSize: 10, label: "תקינים"         },
+};
 
 const TEXT_BLOCKS = [
   {
@@ -80,9 +35,14 @@ const TEXT_BLOCKS = [
   },
 ];
 
-function countByUrgency(window: TimeWindow): Record<Urgency, number> {
-  const counts: Record<Urgency, number> = { red: 0, yellow: 0, green: 0 };
-  Object.values(URGENCY_MAP[window]).forEach((u) => counts[u]++);
+const SECTION_HEADING_ID = "asset-map-heading";
+
+/* ─── helpers ───────────────────────────────────────────────────────────────── */
+function countByStatus(window: TimeWindow): Record<Status, number> {
+  const counts: Record<Status, number> = { urgent: 0, soon: 0, ok: 0 };
+  demoSites.forEach((site) => {
+    counts[URGENCY_MAP[window][site.id]]++;
+  });
   return counts;
 }
 
@@ -101,18 +61,15 @@ function PauseIcon() {
   );
 }
 
-const SECTION_HEADING_ID = "asset-map-heading";
-
+/* ─── component ─────────────────────────────────────────────────────────────── */
 export default function AssetMapSimulation() {
   const [activeWindow, setActiveWindow] = useState<TimeWindow>("היום");
-  const [activeSite, setActiveSite]     = useState<number | null>(null);
   const [isPlaying, setIsPlaying]       = useState(false);
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const inView     = useInView(sectionRef, { once: true, amount: 0.25 });
 
-  const urgency = URGENCY_MAP[activeWindow];
-  const counts  = countByUrgency(activeWindow);
+  const counts = countByStatus(activeWindow);
 
   // Auto-playback: 2-second intervals between time windows
   useEffect(() => {
@@ -124,7 +81,7 @@ export default function AssetMapSimulation() {
   }, [isPlaying, activeWindow]);
 
   function handleWindowClick(w: TimeWindow) {
-    setIsPlaying(false); // manual selection stops auto-play
+    setIsPlaying(false);
     setActiveWindow(w);
   }
 
@@ -170,7 +127,7 @@ export default function AssetMapSimulation() {
         >
           <div className="p-5 sm:p-8 lg:p-10">
 
-            {/* Card header: eyebrow + time selector (no play button here) */}
+            {/* Card header: eyebrow + time selector */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-7">
               <div className="flex items-center gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-brand-cyan shrink-0" aria-hidden="true" />
@@ -184,7 +141,7 @@ export default function AssetMapSimulation() {
                   </span>
                 )}
               </div>
-              {/* Time-window selector — manual selection stops auto-play */}
+              {/* Time-window selector */}
               <div
                 className="inline-flex rounded-xl border border-brand-cyan/25 bg-white/80 p-1 gap-1 shadow-sm"
                 role="group"
@@ -209,100 +166,20 @@ export default function AssetMapSimulation() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 lg:items-center">
 
-              {/* Interactive module (DOM first → mobile top / desktop left) */}
+              {/* Interactive module */}
               <div className="lg:order-last flex flex-col gap-4">
 
-                {/* Map card */}
-                <div
-                  className="relative w-full h-[260px] sm:h-[320px] lg:h-auto lg:aspect-[4/3] rounded-2xl overflow-hidden border border-brand-cyan/25 bg-white shadow-sm"
-                  role="img"
+                {/* Map container */}
+                <div className="relative w-full rounded-2xl overflow-hidden border border-brand-cyan/25 shadow-sm"
+                  style={{ height: "300px" }}
                   aria-label="מפת נכסים אינטראקטיבית של אזור גוש דן"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(to right, #C8E6F5 1px, transparent 1px), linear-gradient(to bottom, #C8E6F5 1px, transparent 1px)",
-                    backgroundSize: "40px 40px",
-                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-brand-cyan/5 to-white/60" aria-hidden="true" />
+                  {/* Actual Leaflet map — SSR disabled */}
+                  <MapComponent activeWindow={activeWindow} />
 
-                  {/* Region label */}
-                  <div className="absolute top-3 start-3 bg-white/90 backdrop-blur-sm text-brand-primary text-xs font-medium px-3 py-1.5 rounded-lg border border-brand-cyan/20 z-10">
-                    אזור גוש דן
-                  </div>
-
-                  {/* Site dots — urgent=large, upcoming=medium, ok=small */}
-                  {SITES.map((site, idx) => {
-                    const u        = urgency[site.id];
-                    const isActive = activeSite === site.id;
-                    const outerPx  = DOT_OUTER_PX[u];
-                    const innerPx  = DOT_INNER_PX[u];
-
-                    return (
-                      <motion.button
-                        key={site.id}
-                        className="absolute z-10 -translate-x-1/2 -translate-y-1/2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan rounded-full"
-                        style={{ left: `${site.x}%`, top: `${site.y}%` }}
-                        aria-label={`${site.name}: ${site.type}, סטטוס: ${URGENCY_LABELS[u]}`}
-                        aria-expanded={isActive}
-                        aria-haspopup="true"
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={inView ? { opacity: 1, scale: 1 } : {}}
-                        transition={{ delay: 0.3 + idx * 0.07, duration: 0.45, type: "spring", stiffness: 300 }}
-                        onMouseEnter={() => setActiveSite(site.id)}
-                        onMouseLeave={() => setActiveSite(null)}
-                        onClick={() => setActiveSite(isActive ? null : site.id)}
-                      >
-                        {/* Outer ring — size by urgency */}
-                        <motion.div
-                          className="rounded-full flex items-center justify-center"
-                          animate={{
-                            backgroundColor: DOT_RING[u],
-                            scale: isActive ? 1.4 : 1,
-                            width:  outerPx,
-                            height: outerPx,
-                          }}
-                          transition={{ duration: 0.4 }}
-                        >
-                          {/* Inner dot */}
-                          <motion.div
-                            className="rounded-full"
-                            animate={{
-                              backgroundColor: DOT_BG[u],
-                              width:  innerPx,
-                              height: innerPx,
-                            }}
-                            transition={{ duration: 0.4 }}
-                          />
-                        </motion.div>
-
-                        {/* Tooltip */}
-                        <AnimatePresence>
-                          {isActive && (
-                            <motion.div
-                              role="tooltip"
-                              className="absolute bottom-7 left-1/2 -translate-x-1/2 w-44 bg-white rounded-xl shadow-xl border border-slate-200 p-3 z-20"
-                              initial={{ opacity: 0, y: 6, scale: 0.95 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: 6, scale: 0.95 }}
-                              transition={{ duration: 0.15 }}
-                            >
-                              <p className="font-bold text-brand-primary text-xs leading-tight">{site.name}</p>
-                              <p className="text-[10px] text-slate-400 mt-0.5">{site.type}</p>
-                              <span className={`mt-2 inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full ${TOOLTIP_BADGE[u]}`}>
-                                {URGENCY_LABELS[u]}
-                              </span>
-                              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-slate-200 rotate-45" aria-hidden="true" />
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.button>
-                    );
-                  })}
-
-                  {/* ── Floating play/pause inside map — bottom-left corner ───── */}
-                  <div className="absolute bottom-4 left-4 z-20 flex flex-col items-center gap-1">
+                  {/* Play/pause button — absolute overlay bottom-left */}
+                  <div className="absolute bottom-4 left-4 z-[1000] flex flex-col items-center gap-1">
                     <div className="relative">
-                      {/* Pulsing ring when playing */}
                       {isPlaying && (
                         <span
                           className="absolute inset-0 rounded-full animate-ping"
@@ -319,11 +196,10 @@ export default function AssetMapSimulation() {
                         {isPlaying ? <PauseIcon /> : <PlayIcon />}
                       </button>
                     </div>
-                    <span className="text-xs text-gray-400 font-medium whitespace-nowrap">
+                    <span className="text-xs text-gray-500 font-medium whitespace-nowrap bg-white/80 px-2 py-0.5 rounded-full">
                       סיור אוטומטי
                     </span>
                   </div>
-
                 </div>
 
                 {/* Legend / summary */}
@@ -350,34 +226,38 @@ export default function AssetMapSimulation() {
                     </AnimatePresence>
                   </p>
                   <div className="flex flex-wrap gap-x-6 gap-y-2">
-                    {(["red", "yellow", "green"] as Urgency[]).map((u) => (
-                      <div key={u} className="flex items-center gap-2">
-                        <span className={`rounded-full shrink-0 ${LEGEND_DOT[u]}`}
-                          style={{ width: DOT_INNER_PX[u], height: DOT_INNER_PX[u] }}
-                          aria-hidden="true"
-                        />
-                        <span className="text-sm font-medium text-slate-700">
-                          <AnimatePresence mode="wait">
-                            <motion.span
-                              key={`${u}-${activeWindow}`}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.25 }}
-                            >
-                              {counts[u]}
-                            </motion.span>
-                          </AnimatePresence>
-                          {" "}{u === "red" ? "דחופים לאיסוף" : u === "yellow" ? "בקרוב" : "תקינים"}
-                        </span>
-                      </div>
-                    ))}
+                    {(["urgent", "soon", "ok"] as Status[]).map((s) => {
+                      const { color, dotSize, label } = LEGEND_CONFIG[s];
+                      return (
+                        <div key={s} className="flex items-center gap-2">
+                          <span
+                            className="rounded-full shrink-0"
+                            style={{ width: dotSize, height: dotSize, backgroundColor: color }}
+                            aria-hidden="true"
+                          />
+                          <span className="text-sm font-medium text-slate-700">
+                            <AnimatePresence mode="wait">
+                              <motion.span
+                                key={`${s}-${activeWindow}`}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.25 }}
+                              >
+                                {counts[s]}
+                              </motion.span>
+                            </AnimatePresence>
+                            {" "}{label}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </motion.div>
 
               </div>
 
-              {/* Text blocks (DOM second → desktop right in RTL) */}
+              {/* Text blocks */}
               <div className="lg:order-first space-y-6">
                 {TEXT_BLOCKS.map((block, i) => (
                   <motion.div
